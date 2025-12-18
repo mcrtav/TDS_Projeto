@@ -13,4 +13,4 @@ db.sqlite3
 # Ignorar uploads de mídia
 media/
 # materia de consulta
-_Readme/
+readme/
