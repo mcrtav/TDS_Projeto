@@ -3,6 +3,7 @@
 {% block title %}Sobre o Sistema{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
     .about-hero {
         background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
@@ -10,12 +11,12 @@
         padding: 80px 0;
         margin-bottom: 50px;
     }
-    
+
     .team-member {
         text-align: center;
         margin-bottom: 30px;
     }
-    
+
     .team-member img {
         width: 150px;
         height: 150px;
@@ -23,26 +24,26 @@
         object-fit: cover;
         margin-bottom: 20px;
         border: 5px solid #f8f9fa;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     }
-    
+
     .tech-icon {
         font-size: 3rem;
         margin: 20px;
         color: #6c757d;
         transition: color 0.3s;
     }
-    
+
     .tech-icon:hover {
         color: #667eea;
     }
-    
+
     .feature-list li {
         margin-bottom: 10px;
         padding-left: 30px;
         position: relative;
     }
-    
+
     .feature-list li:before {
         content: "✓";
         position: absolute;
@@ -59,7 +60,8 @@
     <div class="container">
         <div class="text-center">
             <h1 class="display-4 fw-bold mb-4">Sobre o Sistema</h1>
-            <p class="lead">Uma solução completa para gestão de produtos desenvolvida com as mais modernas tecnologias</p>
+            <p class="lead">Uma solução completa para gestão de produtos desenvolvida com as mais modernas tecnologias
+            </p>
         </div>
     </div>
 </section>
@@ -70,13 +72,17 @@
         <div class="row align-items-center">
             <div class="col-lg-6">
                 <h2 class="fw-bold mb-4">Nossa Missão</h2>
-                <p class="lead mb-4">Desenvolver um sistema robusto, seguro e intuitivo para gestão completa de produtos, categorias e usuários.</p>
-                <p>Nosso objetivo é fornecer uma ferramenta que simplifique o gerenciamento de inventário, torne a experiência do usuário agradável e ajude empresas a organizarem seus produtos de forma eficiente.</p>
-                <p>Com foco em qualidade, usabilidade e performance, desenvolvemos uma solução que atende tanto pequenos negócios quanto grandes empresas.</p>
+                <p class="lead mb-4">Desenvolver um sistema robusto, seguro e intuitivo para gestão completa de
+                    produtos, categorias e usuários.</p>
+                <p>Nosso objetivo é fornecer uma ferramenta que simplifique o gerenciamento de inventário, torne a
+                    experiência do usuário agradável e ajude empresas a organizarem seus produtos de forma eficiente.
+                </p>
+                <p>Com foco em qualidade, usabilidade e performance, desenvolvemos uma solução que atende tanto pequenos
+                    negócios quanto grandes empresas.</p>
             </div>
             <div class="col-lg-6">
-                <img src="https://cdn.pixabay.com/photo/2018/05/08/08/44/artificial-intelligence-3382507_1280.jpg" 
-                     alt="Tecnologia" class="img-fluid rounded shadow">
+                <img src="https://cdn.pixabay.com/photo/2018/05/08/08/44/artificial-intelligence-3382507_1280.jpg"
+                    alt="Tecnologia" class="img-fluid rounded shadow">
             </div>
         </div>
     </div>
@@ -89,7 +95,7 @@
             <h2 class="fw-bold">Funcionalidades Implementadas</h2>
             <p class="text-muted">Tudo o que você precisa em um só lugar</p>
         </div>
-        
+
         <div class="row">
             <div class="col-md-6">
                 <h4 class="mb-4">Para Usuários</h4>
@@ -103,7 +109,7 @@
                     <li>Notificações de promoções</li>
                 </ul>
             </div>
-            
+
             <div class="col-md-6">
                 <h4 class="mb-4">Para Produtos</h4>
                 <ul class="feature-list">
@@ -117,7 +123,7 @@
                     <li>Filtros personalizados</li>
                 </ul>
             </div>
-            
+
             <div class="col-md-6">
                 <h4 class="mb-4">Para Administradores</h4>
                 <ul class="feature-list">
@@ -129,7 +135,7 @@
                     <li>Exportação de dados</li>
                 </ul>
             </div>
-            
+
             <div class="col-md-6">
                 <h4 class="mb-4">Tecnologias Avançadas</h4>
                 <ul class="feature-list">
@@ -153,7 +159,7 @@
             <h2 class="fw-bold">Tecnologias Utilizadas</h2>
             <p class="text-muted">Desenvolvido com as melhores ferramentas do mercado</p>
         </div>
-        
+
         <div class="text-center">
             <div class="d-flex flex-wrap justify-content-center">
                 <div class="m-3">
@@ -161,7 +167,7 @@
                     <p class="mt-2">Python</p>
                 </div>
                 <div class="m-3">
-                    <i class="fab fa-django tech-icon" title="Django"></i>
+                    <i class="fa-brands fa-django tech-icon" title="Django"></i>
                     <p class="mt-2">Django</p>
                 </div>
                 <div class="m-3">
@@ -200,23 +206,26 @@
             <h2 class="fw-bold">Equipe de Desenvolvimento</h2>
             <p class="text-muted">Profissionais dedicados à qualidade</p>
         </div>
-        
+
         <div class="row justify-content-center">
             <div class="col-md-4">
                 <div class="team-member">
-                    <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" 
-                         alt="Desenvolvedor">
-                    <h4>MCRT</h4>
+                    <img src="../media/usuarios/fotos/perfil hotmail.jpg" alt="" srcset="">
+                    <!-- <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"     alt="Desenvolvedor">-->
+                    
+                    <h3>Miriam Cristina </h3>
+                    <h5>MCRT</h5>
                     <p class="text-muted">Desenvolvedor Full Stack</p>
                     <p>Responsável pela arquitetura, backend e frontend do sistema.</p>
                 </div>
             </div>
-            
+
             <div class="col-md-4">
                 <div class="team-member">
-                    <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" 
-                         alt="Equipe">
-                    <h4>Equipe de Desenvolvimento</h4>
+                    <img src="../media/usuarios/fotos/andersom.jpg" alt="" srcset="">
+                    <!-- <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" alt="Equipe"> -->
+                    <h3>Sr. Anderson</h3>
+                    <h5>ACVC</h5>
                     <p class="text-muted">Especialistas em Django</p>
                     <p>Desenvolvimento das funcionalidades e testes do sistema.</p>
                 </div>
@@ -232,10 +241,10 @@
             <h2 class="fw-bold mb-4">Entre em Contato</h2>
             <p class="lead mb-4">Tem alguma dúvida ou sugestão? Fale conosco!</p>
             <div class="d-flex justify-content-center gap-3">
-                <a href="mailto:contato@sistemagestao.com" class="btn btn-primary btn-lg">
+                <a href="mailto:contato@mcrt.com.br" class="btn btn-primary btn-lg">
                     <i class="fas fa-envelope me-2"></i> Enviar Email
                 </a>
-                <a href="#" class="btn btn-outline-primary btn-lg">
+                <a href="https://wa.me/5521999772277" class="btn btn-outline-primary btn-lg">
                     <i class="fas fa-comment-dots me-2"></i> Suporte
                 </a>
             </div>
