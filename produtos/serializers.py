@@ -33,6 +33,7 @@ class ProdutoSerializer(serializers.ModelSerializer):
             'publicado', 'destaque', 'em_promocao', 'visualizacoes',
             'vendas', 'avaliacao_media', 'total_avaliacoes'
         ]
+        
         read_only_fields = [
             'id', 'slug', 'preco_atual', 'desconto_percentual', 'disponivel',
             'data_criacao', 'data_atualizacao', 'visualizacoes', 'vendas',
