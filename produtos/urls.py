@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from produtos import views
+from . import views  # Importando views corretamente
+from produtos import views as produto_views  # Importação alternativa
 
 # Criar router
 router = DefaultRouter()
@@ -28,4 +29,15 @@ extra_urlpatterns = [
     path('<uuid:pk>/historico-precos/', views.ProdutoViewSet.as_view({'get': 'historico_precos'}), name='produto-historico-precos'),
 ]
 
+# URLs para as páginas HTML (renderizadas)
+html_urlpatterns = [
+    # Páginas HTML - comente estas se não tiver as views correspondentes ainda
+    # path('html/', produto_views.listar_produtos, name='listar-produtos'),
+    # path('html/novo/', produto_views.criar_produto, name='criar-produto'),
+    # path('html/<uuid:produto_id>/', produto_views.detalhe_produto, name='detalhe-produto'),
+    # path('html/<uuid:produto_id>/editar/', produto_views.editar_produto, name='editar-produto'),
+    # path('html/favoritos/', produto_views.meus_favoritos, name='favoritos-html'),
+]
+
 urlpatterns += extra_urlpatterns
+# urlpatterns += html_urlpatterns  # Descomente quando criar as views HTML

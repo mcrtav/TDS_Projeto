@@ -12,7 +12,9 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_headers
 import logging
-
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from categorias.models import Categoria
 from produtos.models import Produto, Favorito, ProdutoHistoricoPreco
 from produtos.serializers import (
     ProdutoSerializer,
@@ -463,3 +465,64 @@ class ProdutoViewSet(viewsets.ModelViewSet):
             'mensagem': f'{total_atualizados} produtos atualizados com sucesso',
             'total_atualizados': total_atualizados
         }, status=status.HTTP_200_OK)
+    
+    
+# Página de listagem
+def listar_produtos(request):
+    produtos = Produto.objects.filter(deleted=False, publicado=True)
+    categorias = Categoria.objects.filter(ativo=True, deletado=False)
+    return render(request, 'produtos/listar.html', {
+        'produtos': produtos,
+        'categorias': categorias
+    })
+
+# Página de criação (apenas staff)
+@login_required
+def criar_produto(request):
+    if not request.user.is_staff:
+        return redirect('listar-produtos')
+    
+    categorias = Categoria.objects.filter(ativo=True, deletado=False)
+    return render(request, 'produtos/criar.html', {
+        'categorias': categorias
+    })
+
+# Página de detalhes
+def detalhe_produto(request, produto_id):
+    produto = get_object_or_404(Produto, id=produto_id, deleted=False)
+    
+    # Incrementar visualizações
+    if not request.user.is_staff:
+        produto.incrementar_visualizacoes()
+    
+    return render(request, 'produtos/detalhe.html', {
+        'produto': produto,
+        'produto_id': produto_id
+    })
+
+# Página de edição (apenas staff)
+@login_required
+def editar_produto(request, produto_id):
+    if not request.user.is_staff:
+        return redirect('detalhe-produto', produto_id=produto_id)
+    
+    produto = get_object_or_404(Produto, id=produto_id, deleted=False)
+    categorias = Categoria.objects.filter(ativo=True, deletado=False)
+    
+    return render(request, 'produtos/editar.html', {
+        'produto': produto,
+        'produto_id': produto_id,
+        'categorias': categorias
+    })
+
+# Página de favoritos
+@login_required
+def meus_favoritos(request):
+    favoritos = Produto.objects.filter(
+        favoritado_por__usuario=request.user,
+        deleted=False,
+        publicado=True
+    )
+    return render(request, 'produtos/favoritos.html', {
+        'favoritos': favoritos
+    })
