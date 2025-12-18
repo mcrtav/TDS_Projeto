@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Sistema de Gestão{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 100px 0;
+        margin-bottom: 50px;
+    }
+    
+    .feature-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+        margin-bottom: 30px;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+    }
+    
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 20px;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Sistema de Gestão Completo</h1>
+                <p class="lead mb-4">Gerencie seus produtos, categorias e usuários com facilidade e eficiência. Uma solução completa para o seu negócio.</p>
+                <div class="d-flex gap-3">
+                    <a href="/produtos/" class="btn btn-light btn-lg">
+                        <i class="fas fa-shopping-bag me-2"></i> Ver Produtos
+                    </a>
+                    {% if not user.is_authenticated %}
+                    <a href="/cadastro/" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-user-plus me-2"></i> Cadastre-se
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <img src="https://cdn.pixabay.com/photo/2018/05/18/15/30/web-design-3411373_1280.jpg" 
+                     alt="Sistema de Gestão" class="img-fluid rounded shadow">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Funcionalidades Principais</h2>
+            <p class="text-muted">Tudo que você precisa para gerenciar seu negócio</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon text-primary">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <h4 class="card-title">Gestão de Produtos</h4>
+                        <p class="card-text">Cadastre, edite e gerencie seus produtos com fotos, preços, estoque e categorias.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon text-success">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                        <h4 class="card-title">Categorias</h4>
+                        <p class="card-text">Organize seus produtos em categorias para fácil navegação e gerenciamento.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon text-warning">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h4 class="card-title">Gestão de Usuários</h4>
+                        <p class="card-text">Controle de acesso com perfis de usuário, autenticação segura e recuperação de senha.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon text-info">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h4 class="card-title">Favoritos</h4>
+                        <p class="card-text">Usuários podem favoritar produtos e receber notificações de promoções.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon text-danger">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h4 class="card-title">Estatísticas</h4>
+                        <p class="card-text">Dashboard com estatísticas completas sobre produtos, vendas e usuários.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon text-secondary">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <h4 class="card-title">Responsivo</h4>
+                        <p class="card-text">Interface totalmente responsiva que funciona em qualquer dispositivo.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row" id="stats-container">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-produtos">0</div>
+                    <p class="text-muted mb-0">Produtos</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-categorias">0</div>
+                    <p class="text-muted mb-0">Categorias</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number" id="produtos-promocao">0</div>
+                    <p class="text-muted mb-0">Em Promoção</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-number" id="valor-estoque">R$ 0</div>
+                    <p class="text-muted mb-0">Valor em Estoque</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center">
+            <h2 class="fw-bold mb-4">Pronto para começar?</h2>
+            <p class="lead mb-4">Junte-se a milhares de empresas que já usam nosso sistema de gestão.</p>
+            {% if user.is_authenticated %}
+            <a href="/produtos/" class="btn btn-primary btn-lg">
+                <i class="fas fa-rocket me-2"></i> Gerenciar Produtos
+            </a>
+            {% else %}
+            <a href="/cadastro/" class="btn btn-primary btn-lg me-3">
+                <i class="fas fa-user-plus me-2"></i> Criar Conta
+            </a>
+            <a href="/login/" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-sign-in-alt me-2"></i> Fazer Login
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Carregar estatísticas
+    fetch('/api/produtos/estatisticas/')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('total-produtos').textContent = data.total_produtos;
+            document.getElementById('produtos-promocao').textContent = data.produtos_em_promocao;
+            document.getElementById('valor-estoque').textContent = 
+                'R$ ' + parseFloat(data.valor_total_estoque).toLocaleString('pt-BR', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+        })
+        .catch(error => console.error('Erro ao carregar estatísticas:', error));
+    
+    // Carregar total de categorias
+    fetch('/api/categorias/ativas/')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('total-categorias').textContent = data.count || data.length || 0;
+        })
+        .catch(error => console.error('Erro ao carregar categorias:', error));
+});
+</script>
+{% endblock %}

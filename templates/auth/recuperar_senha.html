@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+
+{% block title %}Recuperar Senha - Sistema de Gestão{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-container {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+    }
+    
+    .auth-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .auth-header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 15px 15px 0 0;
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .auth-body {
+        padding: 40px;
+    }
+    
+    .form-control:focus {
+        border-color: #f093fb;
+        box-shadow: 0 0 0 0.2rem rgba(240, 147, 251, 0.25);
+    }
+    
+    .btn-auth {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        border: none;
+        color: white;
+        padding: 12px;
+        font-weight: 500;
+    }
+    
+    .btn-auth:hover {
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(240, 147, 251, 0.4);
+    }
+    
+    .instructions {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card auth-card">
+                    <div class="auth-header">
+                        <h3><i class="fas fa-key me-2"></i> Recuperar Senha</h3>
+                        <p class="mb-0">Digite seu e-mail para recuperar a senha</p>
+                    </div>
+                    
+                    <div class="auth-body">
+                        <form id="recuperarSenhaForm">
+                            <div class="mb-4">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope me-2"></i>E-mail
+                                </label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                                <div class="form-text">Digite o e-mail cadastrado na sua conta</div>
+                            </div>
+                            
+                            <div class="d-grid gap-2 mb-4">
+                                <button type="submit" class="btn btn-auth btn-lg">
+                                    <i class="fas fa-paper-plane me-2"></i> Enviar Link de Recuperação
+                                </button>
+                            </div>
+                            
+                            <div class="instructions">
+                                <h6><i class="fas fa-info-circle me-2"></i> Instruções:</h6>
+                                <p class="mb-2">1. Digite o e-mail da sua conta</p>
+                                <p class="mb-2">2. Clique no botão acima</p>
+                                <p class="mb-2">3. Verifique sua caixa de entrada</p>
+                                <p class="mb-0">4. Siga as instruções do e-mail recebido</p>
+                            </div>
+                        </form>
+                        
+                        <hr class="my-4">
+                        
+                        <div class="text-center">
+                            <a href="/login/" class="text-decoration-none me-3">
+                                <i class="fas fa-sign-in-alt me-1"></i> Voltar para Login
+                            </a>
+                            <a href="/cadastro/" class="text-decoration-none">
+                                <i class="fas fa-user-plus me-1"></i> Criar Nova Conta
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-danger mt-3 d-none" id="errorAlert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span id="errorMessage"></span>
+                </div>
+                
+                <div class="alert alert-success mt-3 d-none" id="successAlert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span id="successMessage"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('recuperarSenhaForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('email').value.trim();
+    
+    // Show loading
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Enviando...';
+    submitBtn.disabled = true;
+    
+    // Hide previous alerts
+    document.getElementById('errorAlert').classList.add('d-none');
+    document.getElementById('successAlert').classList.add('d-none');
+    
+    // Send request
+    fetch('/api/usuarios/recuperar-senha/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: email })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Show success
+        document.getElementById('successMessage').textContent = 
+            'Se o e-mail existir em nossa base, enviaremos instruções para recuperação da senha.';
+        document.getElementById('successAlert').classList.remove('d-none');
+        
+        // Clear form
+        document.getElementById('email').value = '';
+        
+        // Restore button after 3 seconds
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }, 3000);
+    })
+    .catch(error => {
+        // Show error
+        document.getElementById('errorMessage').textContent = 'Erro ao processar solicitação. Tente novamente.';
+        document.getElementById('errorAlert').classList.remove('d-none');
+        
+        // Restore button
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+</script>
+{% endblock %}

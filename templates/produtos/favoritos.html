@@ -1,0 +1,205 @@
+{% extends 'frontend/base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>
+                <i class="fas fa-heart"></i> Meus Favoritos
+            </h1>
+            <p class="text-muted">Produtos que você marcou como favoritos</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <button class="btn btn-danger" id="limpar-favoritos">
+                <i class="fas fa-trash"></i> Limpar Todos
+            </button>
+        </div>
+    </div>
+    
+    <div class="row" id="favoritos-container">
+        <!-- Favoritos serão carregados via JavaScript -->
+        <div class="col-12">
+            <div class="spinner-container">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando favoritos...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+class FavoritosManager {
+    constructor() {
+        this.baseUrl = '/api/usuarios/';
+        this.authManager = window.authManager;
+        this.initEventListeners();
+        this.carregarFavoritos();
+    }
+    
+    initEventListeners() {
+        // Botão para limpar todos os favoritos
+        const limparBtn = document.getElementById('limpar-favoritos');
+        if (limparBtn) {
+            limparBtn.addEventListener('click', () => this.limparTodosFavoritos());
+        }
+        
+        // Evento para remover favorito individual
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remover-favorito')) {
+                const produtoId = e.target.dataset.id;
+                this.removerFavorito(produtoId);
+            }
+        });
+    }
+    
+    async carregarFavoritos() {
+        try {
+            const response = await this.authManager.fetchWithAuth(`${this.baseUrl}meus-favoritos/`);
+            const result = await response.json();
+            
+            this.renderFavoritos(result.favoritos || result.results || result);
+        } catch (error) {
+            console.error('Erro ao carregar favoritos:', error);
+            this.authManager.showMessage('Erro ao carregar favoritos', 'danger');
+        }
+    }
+    
+    renderFavoritos(favoritos) {
+        const container = document.getElementById('favoritos-container');
+        if (!container) return;
+        
+        if (!favoritos || favoritos.length === 0) {
+            container.innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-heart-broken fa-3x mb-3"></i>
+                        <h4>Nenhum favorito encontrado</h4>
+                        <p>Você ainda não adicionou nenhum produto aos favoritos.</p>
+                        <a href="/produtos/" class="btn btn-primary">
+                            <i class="fas fa-boxes"></i> Ver Produtos
+                        </a>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        
+        favoritos.forEach(produto => {
+            const estoqueStatus = this.getEstoqueStatus(produto.quantidade_estoque, produto.estoque_minimo);
+            
+            html += `
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="position-relative">
+                            <img src="${produto.imagem_url}" class="card-img-top" alt="${produto.nome}" 
+                                 style="height: 200px; object-fit: cover;">
+                            <button class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 remover-favorito" 
+                                    data-id="${produto.id}" title="Remover dos favoritos">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">${produto.nome}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">${produto.marca}</h6>
+                            <p class="card-text">${produto.resumo_descricao || produto.descricao.substring(0, 100)}...</p>
+                            <div class="mb-2">
+                                <span class="badge ${estoqueStatus.classe}">${estoqueStatus.texto}</span>
+                                ${produto.em_destaque ? '<span class="badge bg-warning">Destaque</span>' : ''}
+                            </div>
+                            <p class="card-text">
+                                <strong>Preço:</strong> ${produto.preco_formatado || `R$ ${parseFloat(produto.preco).toFixed(2)}`}<br>
+                                <strong>Categoria:</strong> ${produto.categoria_info?.nome || 'Sem categoria'}<br>
+                                <strong>Telefone:</strong> ${produto.telefone_formatado || 'Não informado'}
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <div class="btn-group w-100">
+                                <a href="/produtos/${produto.id}/" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> Ver
+                                </a>
+                                <a href="/produtos/${produto.id}/editar/" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i> Editar
+                                </a>
+                                <a href="/produtos/${produto.id}/" class="btn btn-sm btn-info">
+                                    <i class="fas fa-shopping-cart"></i> Comprar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+    }
+    
+    async removerFavorito(produtoId) {
+        try {
+            const response = await this.authManager.fetchWithAuth(
+                `${this.baseUrl}desfavoritar/${produtoId}/`,
+                { method: 'DELETE' }
+            );
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                this.authManager.showMessage(result.mensagem, 'success');
+                this.carregarFavoritos();
+            }
+        } catch (error) {
+            console.error('Erro ao remover favorito:', error);
+            this.authManager.showMessage('Erro ao remover favorito', 'danger');
+        }
+    }
+    
+    async limparTodosFavoritos() {
+        if (!confirm('Tem certeza que deseja remover todos os produtos dos favoritos?')) {
+            return;
+        }
+        
+        try {
+            // Como não temos um endpoint específico para limpar todos, 
+            // vamos remover um por um
+            const response = await this.authManager.fetchWithAuth(`${this.baseUrl}meus-favoritos/`);
+            const result = await response.json();
+            const favoritos = result.favoritos || result.results || result;
+            
+            let removidos = 0;
+            for (const produto of favoritos) {
+                await this.authManager.fetchWithAuth(
+                    `${this.baseUrl}desfavoritar/${produto.id}/`,
+                    { method: 'DELETE' }
+                );
+                removidos++;
+            }
+            
+            this.authManager.showMessage(`${removidos} favoritos removidos com sucesso!`, 'success');
+            this.carregarFavoritos();
+        } catch (error) {
+            console.error('Erro ao limpar favoritos:', error);
+            this.authManager.showMessage('Erro ao limpar favoritos', 'danger');
+        }
+    }
+    
+    getEstoqueStatus(quantidade, minimo) {
+        if (quantidade <= 0) {
+            return { status: 'esgotado', texto: 'Esgotado', classe: 'bg-danger' };
+        } else if (quantidade <= minimo) {
+            return { status: 'baixo', texto: 'Estoque Baixo', classe: 'bg-warning' };
+        } else {
+            return { status: 'normal', texto: 'Em Estoque', classe: 'bg-success' };
+        }
+    }
+}
+
+// Inicializar quando o DOM estiver carregado
+document.addEventListener('DOMContentLoaded', () => {
+    window.favoritosManager = new FavoritosManager();
+});
+</script>
+{% endblock %}

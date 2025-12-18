@@ -1,0 +1,72 @@
+sistema_gestao/
+├── setup/
+│   ├── __init__.py
+│   ├── asgi.py
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── usuarios/
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── views.py
+│   ├── urls.py
+│   ├── authentication.py
+│   └── management/
+│       └── commands/
+│           └── seed_data.py
+├── produtos/
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── views.py
+│   └── urls.py
+├── frontend/
+│   ├── __init__.py
+│   ├── apps.py
+│   ├── views.py
+│   ├── urls.py
+│   ├── static/
+│   │   └── frontend/
+│   │       ├── css/
+│   │       │   ├── style.css
+│   │       │   ├── auth.css
+│   │       │   └── produtos.css
+│   │       ├── js/
+│   │       │   ├── main.js
+│   │       │   ├── auth.js
+│   │       │   ├── produtos.js
+│   │       │   ├── usuarios.js
+│   │       │   └── cep.js
+│   │       └── img/
+│   │           ├── logo.png
+│   │           ├── usuario_padrao.png
+│   │           ├── produto_padrao.png
+│   │           └── categoria_padrao.png
+│   └── templates/
+│       └── frontend/
+│           ├── base.html
+│           ├── login.html
+│           ├── cadastro.html
+│           ├── recuperar_senha.html
+│           ├── resetar_senha.html
+│           ├── index.html
+│           ├── produtos/
+│           │   ├── listar.html
+│           │   ├── criar.html
+│           │   ├── editar.html
+│           │   ├── detalhe.html
+│           │   └── favoritos.html
+│           └── usuarios/
+│               ├── perfil.html
+│               └── editar_perfil.html
+├── media/
+├── staticfiles/
+├── manage.py
+├── requirements.txt
+├── README.md
+└── .env.example

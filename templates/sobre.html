@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}Sobre o Sistema{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-hero {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 80px 0;
+        margin-bottom: 50px;
+    }
+    
+    .team-member {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .team-member img {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 20px;
+        border: 5px solid #f8f9fa;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .tech-icon {
+        font-size: 3rem;
+        margin: 20px;
+        color: #6c757d;
+        transition: color 0.3s;
+    }
+    
+    .tech-icon:hover {
+        color: #667eea;
+    }
+    
+    .feature-list li {
+        margin-bottom: 10px;
+        padding-left: 30px;
+        position: relative;
+    }
+    
+    .feature-list li:before {
+        content: "✓";
+        position: absolute;
+        left: 0;
+        color: #28a745;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="about-hero">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="display-4 fw-bold mb-4">Sobre o Sistema</h1>
+            <p class="lead">Uma solução completa para gestão de produtos desenvolvida com as mais modernas tecnologias</p>
+        </div>
+    </div>
+</section>
+
+<!-- Mission Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h2 class="fw-bold mb-4">Nossa Missão</h2>
+                <p class="lead mb-4">Desenvolver um sistema robusto, seguro e intuitivo para gestão completa de produtos, categorias e usuários.</p>
+                <p>Nosso objetivo é fornecer uma ferramenta que simplifique o gerenciamento de inventário, torne a experiência do usuário agradável e ajude empresas a organizarem seus produtos de forma eficiente.</p>
+                <p>Com foco em qualidade, usabilidade e performance, desenvolvemos uma solução que atende tanto pequenos negócios quanto grandes empresas.</p>
+            </div>
+            <div class="col-lg-6">
+                <img src="https://cdn.pixabay.com/photo/2018/05/08/08/44/artificial-intelligence-3382507_1280.jpg" 
+                     alt="Tecnologia" class="img-fluid rounded shadow">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Funcionalidades Implementadas</h2>
+            <p class="text-muted">Tudo o que você precisa em um só lugar</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <h4 class="mb-4">Para Usuários</h4>
+                <ul class="feature-list">
+                    <li>Cadastro com validação de CPF e telefone</li>
+                    <li>Upload de foto de perfil</li>
+                    <li>Recuperação de senha com token</li>
+                    <li>Autenticação JWT segura</li>
+                    <li>Perfil personalizável</li>
+                    <li>Sistema de favoritos</li>
+                    <li>Notificações de promoções</li>
+                </ul>
+            </div>
+            
+            <div class="col-md-6">
+                <h4 class="mb-4">Para Produtos</h4>
+                <ul class="feature-list">
+                    <li>CRUD completo de produtos</li>
+                    <li>Upload de múltiplas imagens</li>
+                    <li>Categorias organizadas</li>
+                    <li>Controle de estoque</li>
+                    <li>Sistema de promoções</li>
+                    <li>Histórico de preços</li>
+                    <li>Busca avançada</li>
+                    <li>Filtros personalizados</li>
+                </ul>
+            </div>
+            
+            <div class="col-md-6">
+                <h4 class="mb-4">Para Administradores</h4>
+                <ul class="feature-list">
+                    <li>Painel administrativo completo</li>
+                    <li>Soft delete em todos os modelos</li>
+                    <li>Estatísticas detalhadas</li>
+                    <li>Controle de usuários</li>
+                    <li>Bulk actions</li>
+                    <li>Exportação de dados</li>
+                </ul>
+            </div>
+            
+            <div class="col-md-6">
+                <h4 class="mb-4">Tecnologias Avançadas</h4>
+                <ul class="feature-list">
+                    <li>API RESTful completa</li>
+                    <li>Autenticação JWT com refresh tokens</li>
+                    <li>Validações em tempo real</li>
+                    <li>Integração com BrasilAPI (CEP)</li>
+                    <li>Cache inteligente</li>
+                    <li>Interface responsiva</li>
+                    <li>Design moderno e intuitivo</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Technologies Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Tecnologias Utilizadas</h2>
+            <p class="text-muted">Desenvolvido com as melhores ferramentas do mercado</p>
+        </div>
+        
+        <div class="text-center">
+            <div class="d-flex flex-wrap justify-content-center">
+                <div class="m-3">
+                    <i class="fab fa-python tech-icon" title="Python"></i>
+                    <p class="mt-2">Python</p>
+                </div>
+                <div class="m-3">
+                    <i class="fab fa-django tech-icon" title="Django"></i>
+                    <p class="mt-2">Django</p>
+                </div>
+                <div class="m-3">
+                    <i class="fab fa-js tech-icon" title="JavaScript"></i>
+                    <p class="mt-2">JavaScript</p>
+                </div>
+                <div class="m-3">
+                    <i class="fab fa-html5 tech-icon" title="HTML5"></i>
+                    <p class="mt-2">HTML5</p>
+                </div>
+                <div class="m-3">
+                    <i class="fab fa-css3-alt tech-icon" title="CSS3"></i>
+                    <p class="mt-2">CSS3</p>
+                </div>
+                <div class="m-3">
+                    <i class="fab fa-bootstrap tech-icon" title="Bootstrap"></i>
+                    <p class="mt-2">Bootstrap 5</p>
+                </div>
+                <div class="m-3">
+                    <i class="fab fa-git-alt tech-icon" title="Git"></i>
+                    <p class="mt-2">Git</p>
+                </div>
+                <div class="m-3">
+                    <i class="fas fa-database tech-icon" title="SQLite"></i>
+                    <p class="mt-2">SQLite</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Equipe de Desenvolvimento</h2>
+            <p class="text-muted">Profissionais dedicados à qualidade</p>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <div class="team-member">
+                    <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" 
+                         alt="Desenvolvedor">
+                    <h4>MCRT</h4>
+                    <p class="text-muted">Desenvolvedor Full Stack</p>
+                    <p>Responsável pela arquitetura, backend e frontend do sistema.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="team-member">
+                    <img src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" 
+                         alt="Equipe">
+                    <h4>Equipe de Desenvolvimento</h4>
+                    <p class="text-muted">Especialistas em Django</p>
+                    <p>Desenvolvimento das funcionalidades e testes do sistema.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center">
+            <h2 class="fw-bold mb-4">Entre em Contato</h2>
+            <p class="lead mb-4">Tem alguma dúvida ou sugestão? Fale conosco!</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="mailto:contato@sistemagestao.com" class="btn btn-primary btn-lg">
+                    <i class="fas fa-envelope me-2"></i> Enviar Email
+                </a>
+                <a href="#" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-comment-dots me-2"></i> Suporte
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

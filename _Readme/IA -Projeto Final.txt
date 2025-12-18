@@ -1,0 +1,37 @@
+1) Recriar todos os Códigos com extensão py
+2) Implementar todas a tarefas do "Menu de Tarefas para Prova como: Campo Validado, Seed de Dados, Validar Senhas, Logout (Back), Frontend (sem framework), Reset de Senha, Upload Imagem para usuários e produtos, Soft Delete,  Categorias, Favoritos.
+3) Montar toas as configurações do JWT com get, post, put e patch 
+4) Fazer todo , html, css, js tudo separado e puro sem framework
+5) Implementar  o cep com  a https://brasilapi.com.br/api/cep/v2/{cep}  colocado junto com o cadastro do usuário editar perfil  preenchimento automático para usuário
+6) Analisar e corrigir os arquivos anexados em py
+7) fazer todas as validações necessárias
+8) Colocar foto no cadastro do usuários  podendo ser opcional e nos produtos.
+9) Usar somente módulos modernos do django e python ultima versão de todos,
+10) Refazer todos os arquivos inclusive os de frontend  serando  html,  css e js 
+11) Deixar tudo html elegante, clássico e sofisticado 
+12) Colocar no Footer "Produzido por MCRT e " 
+13) Revisar todos os html e deixar tudo integrado e robusto htmle e jJWT,
+14) Fazer todos códigos completos e não pedaços que devem ser ineridos no codigo
+15) Refazer tudo do zero revendo os arquivos e a estrutura de pastas e arquivos em anexo
+16) fazer login html e poder ficar logado em varias paginas manter a sessão logada 
+17) fazer o logoff e ir pra pagima index 
+18) fazer uma pagina inicial com as característica do sistema de gerenciamento
+19) N menu colocar os item necessários assim como cadastra, login, produtos sobre ou about ou  o quer mais moderno , fazer um menu moderno e intuitivo seguindo as regra do UI x UX
+20) fazer um footer bem elegante e colocar os ícones de redes sociais
+21) Refaça tudo baseado  nesse AV2 Dev. Sistema - Situação de Avaliação Prática.pdf  e nessa estrutura_pastas.txt.
+
+
+
+
+1) consigo criar email mais não consigo fazer login não reconhee a senha fala que é campo obrigatorio - corrigir
+2) o cep no cadastro não reconhece o api https://brasilapi.com.br/api/cep/v2/{cep} corrigir
+3) não cosigo carregar os produtos da erro de caonecção verifique todos esses arquviso e corrija e mostre o locar para corrigir ou corriga o codigo e mostre o codigo compleo com a correção
+
+
+
+
+
+
+
+Usuario admin criado: admin@email.com / Admin@123
+Usuario normal criado: usuario@email.com / Usuario@123

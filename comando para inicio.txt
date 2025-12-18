@@ -1,0 +1,55 @@
+>> Criar/Instanciar Ambiente Virtual  <<
+
+python -m venv venv
+
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass 
+
+venv\Scripts\Activate
+
+para sair do venv -> deactivate
+
+---------------------------------------------------------------------------------
+
+>> instalar Django e dependencias  <<
+
+py -m pip install django djangorestframework djangorestframework-simplejwt pillow django-cors-headers requests
+
+--------------------------------------------------------------------------------
+
+>> Criar um projeto << 
+
+python -m django startproject “nome do projeto” .
+
+python -m django startproject geopizza .
+
+-----------------------------------------------------------------------------
+
+>> Criar um aplicativo << 
+
+py manage.py startapp usuarios
+
+-----------------------------------------------------------------------------
+
+>> Rodar um projeto <<
+
+entre na pasta do projeto (se precisar)
+cd meu_projeto
+
+py manage.py makemigrations
+
+py manage.py migrate
+
+py manage.py createsuperuser    
+
+python manage.py runserver 8080                                                                        
+
+-----------------------------------------------------------------------------
+>> Cria requirements.txt <<
+
+pip install -r requirements.txt
+
+-----------------------------------------------------------------------------
+>> Instala o requirements.txt
+
+py -m pip freeze > requirements.txt                                                                                                                                                                   
+
