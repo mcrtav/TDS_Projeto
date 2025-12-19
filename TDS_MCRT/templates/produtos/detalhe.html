@@ -1,0 +1,919 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes do Produto - Sistema de Gestão{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-detail-container {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .product-gallery {
+        background: #f8f9fa;
+        padding: 30px;
+        min-height: 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .main-image {
+        max-width: 100%;
+        max-height: 400px;
+        object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .thumbnail-container {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+    
+    .thumbnail {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 5px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.3s;
+    }
+    
+    .thumbnail:hover, .thumbnail.active {
+        border-color: #007bff;
+        transform: scale(1.05);
+    }
+    
+    .product-info {
+        padding: 30px;
+    }
+    
+    .product-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #343a40;
+    }
+    
+    .product-brand {
+        font-size: 1.1rem;
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+    
+    .price-container {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+    
+    .current-price {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #28a745;
+    }
+    
+    .original-price {
+        font-size: 1.3rem;
+        text-decoration: line-through;
+        color: #6c757d;
+    }
+    
+    .discount-badge {
+        background: #dc3545;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .stock-badge {
+        font-size: 0.9rem;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin: 25px 0;
+    }
+    
+    .specs-table {
+        margin: 25px 0;
+    }
+    
+    .specs-table tr td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .specs-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .tab-content {
+        background: #f8f9fa;
+        border-radius: 0 0 8px 8px;
+        padding: 25px;
+        border: 1px solid #dee2e6;
+        border-top: none;
+    }
+    
+    .review-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border-left: 4px solid #ffc107;
+    }
+    
+    .rating-stars {
+        color: #ffc107;
+        font-size: 1.2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border-top: 4px solid #007bff;
+    }
+    
+    .stat-card .number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #007bff;
+        margin-bottom: 5px;
+    }
+    
+    .stat-card .label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item"><a href="/produtos/">Produtos</a></li>
+                    <li class="breadcrumb-item active" id="breadcrumb-name">Detalhes</li>
+                </ol>
+            </nav>
+
+            <div class="product-detail-container">
+                <div class="row g-0">
+                    <!-- Galeria de Imagens -->
+                    <div class="col-lg-6">
+                        <div class="product-gallery">
+                            <img id="main-image" class="main-image" src="" alt="Produto">
+                            
+                            <div class="thumbnail-container">
+                                <!-- Thumbnails serão adicionados via JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Informações do Produto -->
+                    <div class="col-lg-6">
+                        <div class="product-info">
+                            <!-- Cabeçalho -->
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h1 class="product-title" id="product-name">Carregando...</h1>
+                                    <div class="product-brand" id="product-brand"></div>
+                                </div>
+                                <div>
+                                    <button class="btn btn-link btn-lg p-0" id="favorite-btn">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Avaliação -->
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="rating-stars me-2" id="rating-stars">
+                                    ★★★★★
+                                </div>
+                                <span class="text-muted" id="rating-text">(0 avaliações)</span>
+                            </div>
+                            
+                            <!-- Preço -->
+                            <div class="price-container">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <div class="current-price" id="current-price">R$ 0,00</div>
+                                        <div class="original-price d-none" id="original-price">R$ 0,00</div>
+                                    </div>
+                                    <div class="discount-badge d-none" id="discount-badge">0% OFF</div>
+                                </div>
+                                <div class="mt-3">
+                                    <span class="stock-badge" id="stock-badge"></span>
+                                    <span class="badge bg-secondary ms-2" id="product-state"></span>
+                                </div>
+                            </div>
+                            
+                            <!-- Descrição Curta -->
+                            <div class="mt-4">
+                                <p class="lead" id="short-description"></p>
+                            </div>
+                            
+                            <!-- Botões de Ação -->
+                            <div class="action-buttons">
+                                {% if user.is_authenticated and user.is_staff %}
+                                <a href="#" id="edit-btn" class="btn btn-primary">
+                                    <i class="fas fa-edit me-2"></i> Editar
+                                </a>
+                                {% endif %}
+                                
+                                <button class="btn btn-success" id="add-to-cart">
+                                    <i class="fas fa-shopping-cart me-2"></i> Adicionar ao Carrinho
+                                </button>
+                                
+                                <button class="btn btn-outline-primary" id="buy-now">
+                                    <i class="fas fa-bolt me-2"></i> Comprar Agora
+                                </button>
+                            </div>
+                            
+                            <!-- Especificações -->
+                            <div class="specs-table">
+                                <table class="table">
+                                    <tbody id="specs-body">
+                                        <!-- Especificações serão adicionadas via JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs de Conteúdo -->
+            <div class="mt-4">
+                <ul class="nav nav-tabs" id="detailTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab">
+                            <i class="fas fa-file-alt me-2"></i> Descrição Completa
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="specs-tab" data-bs-toggle="tab" data-bs-target="#specs" type="button" role="tab">
+                            <i class="fas fa-list me-2"></i> Especificações
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">
+                            <i class="fas fa-star me-2"></i> Avaliações
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab">
+                            <i class="fas fa-chart-line me-2"></i> Estatísticas
+                        </button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="detailTabsContent">
+                    <!-- Tab 1: Descrição -->
+                    <div class="tab-pane fade show active" id="description" role="tabpanel">
+                        <div id="full-description" class="product-description">
+                            <!-- Descrição será carregada via JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <!-- Tab 2: Especificações -->
+                    <div class="tab-pane fade" id="specs" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-striped">
+                                    <tbody id="detailed-specs">
+                                        <!-- Especificações detalhadas serão carregadas via JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab 3: Avaliações -->
+                    <div class="tab-pane fade" id="reviews" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="text-center mb-4">
+                                    <div class="display-1 text-warning" id="average-rating">0.0</div>
+                                    <div class="rating-stars mb-2" id="average-stars">
+                                        ★★★★★
+                                    </div>
+                                    <div class="text-muted" id="total-reviews">Baseado em 0 avaliações</div>
+                                </div>
+                                
+                                {% if user.is_authenticated %}
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Deixe sua avaliação</h5>
+                                        <div class="mb-3">
+                                            <div class="rating-input">
+                                                <span class="star" data-value="1">★</span>
+                                                <span class="star" data-value="2">★</span>
+                                                <span class="star" data-value="3">★</span>
+                                                <span class="star" data-value="4">★</span>
+                                                <span class="star" data-value="5">★</span>
+                                            </div>
+                                        </div>
+                                        <textarea class="form-control mb-3" id="review-text" rows="3" placeholder="Compartilhe sua experiência..."></textarea>
+                                        <button class="btn btn-primary w-100" id="submit-review">
+                                            <i class="fas fa-paper-plane me-2"></i> Enviar Avaliação
+                                        </button>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Faça <a href="/login/">login</a> para deixar uma avaliação.
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-8">
+                                <div id="reviews-container">
+                                    <!-- Avaliações serão carregadas via JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab 4: Estatísticas -->
+                    <div class="tab-pane fade" id="stats" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <div class="stat-card">
+                                    <div class="number" id="stat-views">0</div>
+                                    <div class="label">Visualizações</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="stat-card">
+                                    <div class="number" id="stat-sales">0</div>
+                                    <div class="label">Vendas</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="stat-card">
+                                    <div class="number" id="stat-favorites">0</div>
+                                    <div class="label">Favoritos</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="stat-card">
+                                    <div class="number" id="stat-returns">0</div>
+                                    <div class="label">Devoluções</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                <i class="fas fa-history me-2"></i> Histórico de Preços
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Data</th>
+                                                <th>Preço Antigo</th>
+                                                <th>Preço Novo</th>
+                                                <th>Variação</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="price-history">
+                                            <!-- Histórico será carregado via JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let produtoId = window.location.pathname.split('/').filter(x => x).pop();
+let produtoManager = {
+    produto: null,
+    
+    init: function() {
+        this.loadProduto();
+        this.setupEventListeners();
+    },
+    
+    loadProduto: async function() {
+        try {
+            const response = await fetch(`/api/produtos/${produtoId}/`);
+            this.produto = await response.json();
+            
+            this.renderProduto();
+            this.carregarEstatisticas();
+            this.carregarHistoricoPrecos();
+        } catch (error) {
+            console.error('Erro ao carregar produto:', error);
+            this.showError('Produto não encontrado');
+        }
+    },
+    
+    renderProduto: function() {
+        if (!this.produto) return;
+        
+        // Título e breadcrumb
+        document.getElementById('product-name').textContent = this.produto.nome;
+        document.getElementById('breadcrumb-name').textContent = this.produto.nome;
+        document.getElementById('product-brand').textContent = this.produto.marca;
+        
+        // Imagens
+        this.renderImagens();
+        
+        // Preço
+        this.renderPreco();
+        
+        // Descrição
+        document.getElementById('short-description').textContent = 
+            this.produto.descricao_curta || this.produto.descricao?.substring(0, 150) + '...';
+        document.getElementById('full-description').innerHTML = 
+            `<p>${this.produto.descricao.replace(/\n/g, '</p><p>')}</p>`;
+        
+        // Avaliação
+        this.renderAvaliacao();
+        
+        // Especificações
+        this.renderEspecificacoes();
+        
+        // Estado do estoque
+        this.renderEstadoEstoque();
+        
+        // Botão de edição
+        const editBtn = document.getElementById('edit-btn');
+        if (editBtn) {
+            editBtn.href = `/produtos/${produtoId}/editar/`;
+        }
+        
+        // Botão de favorito
+        this.configurarFavorito();
+    },
+    
+    renderImagens: function() {
+        const mainImage = document.getElementById('main-image');
+        const thumbnailContainer = document.querySelector('.thumbnail-container');
+        
+        // Imagem principal
+        if (this.produto.imagem_principal_url) {
+            mainImage.src = this.produto.imagem_principal_url;
+            mainImage.alt = this.produto.nome;
+        } else {
+            mainImage.src = '/static/img/produto_padrao.png';
+        }
+        
+        // Thumbnails
+        thumbnailContainer.innerHTML = '';
+        
+        // Thumbnail da imagem principal
+        if (this.produto.imagem_principal_url) {
+            const thumb = this.criarThumbnail(this.produto.imagem_principal_url, 'Principal');
+            thumb.classList.add('active');
+            thumbnailContainer.appendChild(thumb);
+        }
+        
+        // Thumbnail da imagem secundária
+        if (this.produto.imagem_secundaria_url) {
+            thumbnailContainer.appendChild(
+                this.criarThumbnail(this.produto.imagem_secundaria_url, 'Secundária')
+            );
+        }
+    },
+    
+    criarThumbnail: function(src, alt) {
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = alt;
+        img.className = 'thumbnail';
+        img.addEventListener('click', () => {
+            document.getElementById('main-image').src = src;
+            document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+            img.classList.add('active');
+        });
+        return img;
+    },
+    
+    renderPreco: function() {
+        const precoAtual = this.produto.preco_atual || this.produto.preco;
+        const precoOriginal = this.produto.preco;
+        const desconto = this.produto.desconto_percentual || 0;
+        
+        document.getElementById('current-price').textContent = 
+            `R$ ${parseFloat(precoAtual).toFixed(2).replace('.', ',')}`;
+        
+        if (desconto > 0) {
+            document.getElementById('original-price').textContent = 
+                `R$ ${parseFloat(precoOriginal).toFixed(2).replace('.', ',')}`;
+            document.getElementById('original-price').classList.remove('d-none');
+            document.getElementById('discount-badge').textContent = `${desconto}% OFF`;
+            document.getElementById('discount-badge').classList.remove('d-none');
+        }
+    },
+    
+    renderAvaliacao: function() {
+        const rating = this.produto.avaliacao_media || 0;
+        const totalAvaliacoes = this.produto.total_avaliacoes || 0;
+        
+        // Estrelas da avaliação média
+        const stars = document.getElementById('rating-stars');
+        stars.innerHTML = this.criarEstrelas(rating);
+        
+        // Texto da avaliação
+        document.getElementById('rating-text').textContent = 
+            `(${totalAvaliacoes} avaliação${totalAvaliacoes !== 1 ? 'es' : ''})`;
+        
+        // Avaliação média no tab de reviews
+        document.getElementById('average-rating').textContent = rating.toFixed(1);
+        document.getElementById('average-stars').innerHTML = this.criarEstrelas(rating);
+        document.getElementById('total-reviews').textContent = 
+            `Baseado em ${totalAvaliacoes} avaliação${totalAvaliacoes !== 1 ? 'es' : ''}`;
+    },
+    
+    criarEstrelas: function(rating) {
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 >= 0.5;
+        const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+        
+        let stars = '';
+        for (let i = 0; i < fullStars; i++) stars += '<span class="text-warning">★</span>';
+        if (hasHalfStar) stars += '<span class="text-warning">★</span><span class="text-secondary">☆</span>';
+        for (let i = 0; i < emptyStars; i++) stars += '<span class="text-secondary">☆</span>';
+        
+        return stars;
+    },
+    
+    renderEspecificacoes: function() {
+        const specsBody = document.getElementById('specs-body');
+        const detailedSpecs = document.getElementById('detailed-specs');
+        
+        const especificacoes = [
+            { label: 'Categoria', value: this.produto.categoria?.nome || 'Não informada', detail: true },
+            { label: 'SKU', value: this.produto.sku || 'Não informado', detail: true },
+            { label: 'Código de Barras', value: this.produto.codigo_barras || 'Não informado', detail: true },
+            { label: 'Estado', value: this.getEstadoTexto(this.produto.estado), detail: true },
+            { label: 'Peso', value: this.produto.peso ? `${this.produto.peso} kg` : 'Não informado', detail: true },
+            { label: 'Dimensões', value: this.produto.dimensoes || 'Não informado', detail: true }
+        ];
+        
+        // Especificações rápidas
+        let specsHtml = '';
+        especificacoes.slice(0, 4).forEach(spec => {
+            if (spec.value && spec.value !== 'Não informado') {
+                specsHtml += `
+                    <tr>
+                        <td><strong>${spec.label}</strong></td>
+                        <td>${spec.value}</td>
+                    </tr>
+                `;
+            }
+        });
+        specsBody.innerHTML = specsHtml;
+        
+        // Especificações detalhadas
+        let detailedHtml = '';
+        especificacoes.forEach(spec => {
+            if (spec.detail && spec.value && spec.value !== 'Não informado') {
+                detailedHtml += `
+                    <tr>
+                        <td><strong>${spec.label}</strong></td>
+                        <td>${spec.value}</td>
+                    </tr>
+                `;
+            }
+        });
+        detailedSpecs.innerHTML = detailedHtml;
+    },
+    
+    getEstadoTexto: function(estado) {
+        const estados = {
+            'novo': 'Novo',
+            'usado': 'Usado',
+            'seminovo': 'Seminovo',
+            'recondicionado': 'Recondicionado'
+        };
+        return estados[estado] || estado;
+    },
+    
+    renderEstadoEstoque: function() {
+        const stockBadge = document.getElementById('stock-badge');
+        const quantidade = this.produto.quantidade || 0;
+        
+        if (quantidade > 10) {
+            stockBadge.textContent = 'Em estoque';
+            stockBadge.className = 'stock-badge bg-success text-white';
+        } else if (quantidade > 0) {
+            stockBadge.textContent = `Apenas ${quantidade} em estoque`;
+            stockBadge.className = 'stock-badge bg-warning text-dark';
+        } else {
+            stockBadge.textContent = 'Esgotado';
+            stockBadge.className = 'stock-badge bg-danger text-white';
+        }
+        
+        // Estado do produto
+        document.getElementById('product-state').textContent = 
+            this.getEstadoTexto(this.produto.estado);
+    },
+    
+    configurarFavorito: function() {
+        const favoriteBtn = document.getElementById('favorite-btn');
+        const icon = favoriteBtn.querySelector('i');
+        
+        // Verificar se é favorito
+        if (this.produto.is_favorito) {
+            icon.className = 'fas fa-heart text-danger';
+        }
+        
+        favoriteBtn.addEventListener('click', () => this.toggleFavorito());
+    },
+    
+    toggleFavorito: async function() {
+        const favoriteBtn = document.getElementById('favorite-btn');
+        const icon = favoriteBtn.querySelector('i');
+        const isFavorito = icon.classList.contains('fa-heart');
+        
+        try {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                window.location.href = `/login/?next=${encodeURIComponent(window.location.pathname)}`;
+                return;
+            }
+            
+            const url = `/api/produtos/${produtoId}/${isFavorito ? 'desfavoritar' : 'favoritar'}/`;
+            const method = isFavorito ? 'DELETE' : 'POST';
+            
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken()
+                },
+                body: method === 'POST' ? JSON.stringify({ notificar_promocao: true }) : null
+            });
+            
+            if (response.ok) {
+                if (isFavorito) {
+                    icon.className = 'far fa-heart';
+                    this.showAlert('Produto removido dos favoritos', 'info');
+                } else {
+                    icon.className = 'fas fa-heart text-danger';
+                    this.showAlert('Produto adicionado aos favoritos', 'success');
+                }
+                
+                // Atualizar contagem de favoritos
+                this.carregarEstatisticas();
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar favoritos:', error);
+            this.showAlert('Erro ao atualizar favoritos', 'danger');
+        }
+    },
+    
+    carregarEstatisticas: function() {
+        if (!this.produto) return;
+        
+        document.getElementById('stat-views').textContent = 
+            this.produto.visualizacoes?.toLocaleString() || '0';
+        document.getElementById('stat-sales').textContent = 
+            this.produto.vendas?.toLocaleString() || '0';
+        
+        // Nota: Para favoritos e devoluções, você pode precisar de endpoints específicos
+    },
+    
+    carregarHistoricoPrecos: async function() {
+        try {
+            const response = await fetch(`/api/produtos/${produtoId}/historico-precos/`);
+            const historico = await response.json();
+            const tbody = document.getElementById('price-history');
+            
+            if (historico.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">
+                            Nenhum histórico de preços disponível
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            historico.forEach((item, index) => {
+                const variacao = ((item.preco_novo - item.preco_antigo) / item.preco_antigo * 100).toFixed(1);
+                const variacaoClass = variacao > 0 ? 'text-danger' : variacao < 0 ? 'text-success' : '';
+                const variacaoIcon = variacao > 0 ? '↗' : variacao < 0 ? '↘' : '→';
+                
+                html += `
+                    <tr>
+                        <td>${new Date(item.data_alteracao).toLocaleDateString('pt-BR')}</td>
+                        <td>R$ ${parseFloat(item.preco_antigo).toFixed(2).replace('.', ',')}</td>
+                        <td>R$ ${parseFloat(item.preco_novo).toFixed(2).replace('.', ',')}</td>
+                        <td class="${variacaoClass}">
+                            ${variacaoIcon} ${Math.abs(variacao)}%
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        } catch (error) {
+            console.error('Erro ao carregar histórico:', error);
+        }
+    },
+    
+    setupEventListeners: function() {
+        // Sistema de avaliação
+        const stars = document.querySelectorAll('.star');
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                const value = parseInt(this.dataset.value);
+                this.parentNode.querySelectorAll('.star').forEach((s, i) => {
+                    s.classList.toggle('text-warning', i < value);
+                    s.classList.toggle('text-secondary', i >= value);
+                });
+            });
+        });
+        
+        // Botão de avaliação
+        const submitReview = document.getElementById('submit-review');
+        if (submitReview) {
+            submitReview.addEventListener('click', () => this.submitAvaliacao());
+        }
+        
+        // Botões de compra
+        document.getElementById('add-to-cart').addEventListener('click', () => {
+            this.adicionarAoCarrinho();
+        });
+        
+        document.getElementById('buy-now').addEventListener('click', () => {
+            this.comprarAgora();
+        });
+    },
+    
+    submitAvaliacao: async function() {
+        const rating = document.querySelectorAll('.star.text-warning').length;
+        const texto = document.getElementById('review-text').value.trim();
+        
+        if (rating === 0) {
+            this.showAlert('Por favor, selecione uma avaliação', 'warning');
+            return;
+        }
+        
+        if (!texto) {
+            this.showAlert('Por favor, escreva um comentário', 'warning');
+            return;
+        }
+        
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await fetch(`/api/produtos/${produtoId}/avaliar/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken()
+                },
+                body: JSON.stringify({
+                    rating: rating,
+                    comentario: texto
+                })
+            });
+            
+            if (response.ok) {
+                this.showAlert('Avaliação enviada com sucesso!', 'success');
+                document.getElementById('review-text').value = '';
+                
+                // Recarregar avaliações
+                setTimeout(() => {
+                    this.loadProduto();
+                }, 1000);
+            } else {
+                throw new Error('Erro ao enviar avaliação');
+            }
+        } catch (error) {
+            console.error('Erro ao enviar avaliação:', error);
+            this.showAlert('Erro ao enviar avaliação', 'danger');
+        }
+    },
+    
+    adicionarAoCarrinho: function() {
+        if (!this.produto.disponivel) {
+            this.showAlert('Produto indisponível no momento', 'warning');
+            return;
+        }
+        
+        // Implementar lógica do carrinho
+        this.showAlert('Produto adicionado ao carrinho!', 'success');
+    },
+    
+    comprarAgora: function() {
+        if (!this.produto.disponivel) {
+            this.showAlert('Produto indisponível no momento', 'warning');
+            return;
+        }
+        
+        // Redirecionar para checkout
+        window.location.href = `/checkout/?produto=${produtoId}&quantidade=1`;
+    },
+    
+    getCSRFToken: function() {
+        let cookieValue = null;
+        if (document.cookie) {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, 10) === ('csrftoken=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(10));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    },
+    
+    showAlert: function(message, type = 'info') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alertDiv.style.cssText = `
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            max-width: 500px;
+        `;
+        
+        const icon = type === 'success' ? 'check-circle' :
+                    type === 'danger' ? 'exclamation-circle' :
+                    type === 'warning' ? 'exclamation-triangle' : 'info-circle';
+        
+        alertDiv.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-${icon} me-2"></i>
+                <div class="flex-grow-1">${message}</div>
+                <button type="button" class="btn-close" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    },
+    
+    showError: function(message) {
+        document.querySelector('.product-detail-container').innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                <h3>${message}</h3>
+                <p class="text-muted">O produto que você está procurando não foi encontrado.</p>
+                <a href="/produtos/" class="btn btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i> Voltar para Produtos
+                </a>
+            </div>
+        `;
+    }
+};
+
+// Inicializar quando o DOM carregar
+document.addEventListener('DOMContentLoaded', function() {
+    produtoManager.init();
+});
+</script>
+{% endblock %}

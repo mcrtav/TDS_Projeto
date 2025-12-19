@@ -1,0 +1,853 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Produto - Sistema de Gestão{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        padding: 30px;
+    }
+    
+    .image-preview-container {
+        position: relative;
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: #f8f9fa;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .image-preview-container:hover {
+        border-color: #007bff;
+        background: #e7f3ff;
+    }
+    
+    .image-preview {
+        max-width: 100%;
+        max-height: 180px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+    
+    .image-change-btn {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+    }
+    
+    .current-image {
+        border: 2px solid #28a745;
+        padding: 5px;
+        background: white;
+    }
+    
+    .price-display {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-left: 4px solid #007bff;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .tab-content {
+        background: #f8f9fa;
+        border-radius: 0 0 8px 8px;
+        padding: 25px;
+        border: 1px solid #dee2e6;
+        border-top: none;
+    }
+    
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <!-- Cabeçalho -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-edit me-2"></i> Editar Produto
+                    </h2>
+                    <p class="text-muted mb-0" id="produtoNome">Carregando...</p>
+                </div>
+                <div>
+                    <a href="/produtos/" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left me-2"></i> Voltar
+                    </a>
+                    <button class="btn btn-danger" id="btn-deletar">
+                        <i class="fas fa-trash me-2"></i> Deletar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Estatísticas -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="text-muted small">Visualizações</div>
+                        <div class="h4 mb-0" id="stat-visualizacoes">0</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="text-muted small">Vendas</div>
+                        <div class="h4 mb-0" id="stat-vendas">0</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="text-muted small">Avaliação</div>
+                        <div class="h4 mb-0" id="stat-avaliacao">0.0</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="text-muted small">Favoritos</div>
+                        <div class="h4 mb-0" id="stat-favoritos">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulário -->
+            <div class="form-container">
+                <form id="form-produto" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" id="produto_id" value="{{ produto_id }}">
+                    
+                    <!-- Tabs -->
+                    <ul class="nav nav-tabs mb-4" id="produtoTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab">
+                                <i class="fas fa-info-circle me-2"></i> Informações
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="preco-tab" data-bs-toggle="tab" data-bs-target="#preco" type="button" role="tab">
+                                <i class="fas fa-tag me-2"></i> Preço & Estoque
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="imagens-tab" data-bs-toggle="tab" data-bs-target="#imagens" type="button" role="tab">
+                                <i class="fas fa-images me-2"></i> Imagens
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="seo-tab" data-bs-toggle="tab" data-bs-target="#seo" type="button" role="tab">
+                                <i class="fas fa-search me-2"></i> SEO
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="historico-tab" data-bs-toggle="tab" data-bs-target="#historico" type="button" role="tab">
+                                <i class="fas fa-history me-2"></i> Histórico
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="produtoTabsContent">
+                        <!-- Tab 1: Informações -->
+                        <div class="tab-pane fade show active" id="info" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-8 mb-3">
+                                    <label for="nome" class="form-label required-field">Nome do Produto</label>
+                                    <input type="text" class="form-control" id="nome" name="nome" required>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <label for="marca" class="form-label required-field">Marca</label>
+                                    <input type="text" class="form-control" id="marca" name="marca" required>
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    <label for="descricao" class="form-label required-field">Descrição</label>
+                                    <textarea class="form-control" id="descricao" name="descricao" rows="4" required></textarea>
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    <label for="descricao_curta" class="form-label">Descrição Curta</label>
+                                    <textarea class="form-control" id="descricao_curta" name="descricao_curta" rows="2"></textarea>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="categoria" class="form-label required-field">Categoria</label>
+                                    <select class="form-select" id="categoria" name="categoria_id" required>
+                                        <option value="">Selecione uma categoria</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="estado" class="form-label">Estado</label>
+                                    <select class="form-select" id="estado" name="estado">
+                                        <option value="novo">Novo</option>
+                                        <option value="usado">Usado</option>
+                                        <option value="seminovo">Seminovo</option>
+                                        <option value="recondicionado">Recondicionado</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="sku" class="form-label">SKU</label>
+                                    <input type="text" class="form-control" id="sku" name="sku">
+                                    <div class="form-text" id="sku-status"></div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="codigo_barras" class="form-label">Código de Barras</label>
+                                    <input type="text" class="form-control" id="codigo_barras" name="codigo_barras">
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="peso" class="form-label">Peso (kg)</label>
+                                    <input type="number" class="form-control" id="peso" name="peso" step="0.001" min="0">
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="dimensoes" class="form-label">Dimensões (cm)</label>
+                                    <input type="text" class="form-control" id="dimensoes" name="dimensoes">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2: Preço & Estoque -->
+                        <div class="tab-pane fade" id="preco" role="tabpanel">
+                            <div class="price-display">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-2">
+                                            <small class="text-muted">Preço Atual</small>
+                                            <div class="h4 text-success" id="preco-atual-display">R$ 0,00</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-2">
+                                            <small class="text-muted">Preço Original</small>
+                                            <div class="h5 text-muted" id="preco-original-display">R$ 0,00</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-2">
+                                            <small class="text-muted">Desconto</small>
+                                            <div class="h5 text-danger" id="desconto-display">0%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="preco" class="form-label required-field">Preço Normal (R$)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input type="number" class="form-control" id="preco" name="preco" 
+                                               step="0.01" min="0.01" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="preco_promocional" class="form-label">Preço Promocional (R$)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input type="number" class="form-control" id="preco_promocional" 
+                                               name="preco_promocional" step="0.01" min="0.01">
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="quantidade" class="form-label required-field">Quantidade em Estoque</label>
+                                    <input type="number" class="form-control" id="quantidade" name="quantidade" min="0" required>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check mt-4 pt-2">
+                                        <input class="form-check-input" type="checkbox" id="em_promocao" name="em_promocao">
+                                        <label class="form-check-label" for="em_promocao">
+                                            Produto em promoção
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Ao alterar o preço, será registrado no histórico de preços.
+                            </div>
+                        </div>
+
+                        <!-- Tab 3: Imagens -->
+                        <div class="tab-pane fade" id="imagens" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label">Imagem Principal</label>
+                                    <div class="image-preview-container" onclick="document.getElementById('imagem_principal').click()">
+                                        <img id="preview_principal" class="image-preview" src="" style="display: none;">
+                                        <i class="fas fa-camera" id="icon_principal" style="display: none;"></i>
+                                        <div class="preview-text" id="text_principal">Clique para alterar imagem principal</div>
+                                        <input type="file" class="d-none" id="imagem_principal" name="imagem_principal" 
+                                               accept="image/*" onchange="produtoManager.previewImage(this, 'preview_principal', 'icon_principal', 'text_principal')">
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label">Imagem Secundária</label>
+                                    <div class="image-preview-container" onclick="document.getElementById('imagem_secundaria').click()">
+                                        <img id="preview_secundaria" class="image-preview" src="" style="display: none;">
+                                        <i class="fas fa-images" id="icon_secundaria" style="display: none;"></i>
+                                        <div class="preview-text" id="text_secundaria">Clique para alterar imagem secundária</div>
+                                        <input type="file" class="d-none" id="imagem_secundaria" name="imagem_secundaria"
+                                               accept="image/*" onchange="produtoManager.previewImage(this, 'preview_secundaria', 'icon_secundaria', 'text_secundaria')">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Ao substituir uma imagem, a anterior será permanentemente removida.
+                            </div>
+                        </div>
+
+                        <!-- Tab 4: SEO -->
+                        <div class="tab-pane fade" id="seo" role="tabpanel">
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="slug" class="form-label">Slug (URL)</label>
+                                    <input type="text" class="form-control" id="slug" name="slug">
+                                    <div class="form-text">URL amigável para o produto. Deixe em branco para auto-gerar.</div>
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    <label for="meta_titulo" class="form-label">Meta Título</label>
+                                    <input type="text" class="form-control" id="meta_titulo" name="meta_titulo">
+                                    <div class="form-text" id="meta_titulo_count">0/60 caracteres</div>
+                                </div>
+                                
+                                <div class="col-12 mb-3">
+                                    <label for="meta_descricao" class="form-label">Meta Descrição</label>
+                                    <textarea class="form-control" id="meta_descricao" name="meta_descricao" rows="3"></textarea>
+                                    <div class="form-text" id="meta_descricao_count">0/160 caracteres</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 5: Histórico -->
+                        <div class="tab-pane fade" id="historico" role="tabpanel">
+                            <div class="mb-3">
+                                <h5><i class="fas fa-history me-2"></i> Histórico de Preços</h5>
+                                <div id="historico-precos" class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Data</th>
+                                                <th>Preço Antigo</th>
+                                                <th>Preço Novo</th>
+                                                <th>Alterado Por</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="historico-body">
+                                            <!-- Histórico será carregado via JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Controles -->
+                    <div class="row mt-4">
+                        <div class="col-md-6 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="publicado" name="publicado">
+                                <label class="form-check-label" for="publicado">
+                                    Produto publicado
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="destaque" name="destaque">
+                                <label class="form-check-label" for="destaque">
+                                    Produto em destaque
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="button" class="btn btn-outline-secondary me-2" onclick="window.location.href='/produtos/'">
+                                    <i class="fas fa-times me-2"></i> Cancelar
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i> Salvar Alterações
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let produtoId = document.getElementById('produto_id').value;
+let produtoManager = {
+    produto: null,
+    
+    init: function() {
+        this.loadProduto();
+        this.loadCategorias();
+        this.setupForm();
+        this.setupEventListeners();
+    },
+    
+    loadProduto: async function() {
+        try {
+            const response = await fetch(`/api/produtos/${produtoId}/`);
+            this.produto = await response.json();
+            
+            this.preencherFormulario();
+            this.carregarEstatisticas();
+            this.carregarHistoricoPrecos();
+        } catch (error) {
+            console.error('Erro ao carregar produto:', error);
+            this.showAlert('Produto não encontrado', 'danger');
+            setTimeout(() => window.location.href = '/produtos/', 2000);
+        }
+    },
+    
+    loadCategorias: async function() {
+        try {
+            const response = await fetch('/api/categorias/ativas/');
+            const data = await response.json();
+            const select = document.getElementById('categoria');
+            
+            if (data.results || Array.isArray(data)) {
+                const categorias = data.results || data;
+                
+                categorias.forEach(categoria => {
+                    const option = document.createElement('option');
+                    option.value = categoria.id;
+                    option.textContent = categoria.nome;
+                    select.appendChild(option);
+                });
+                
+                // Selecionar a categoria atual após carregar
+                if (this.produto && this.produto.categoria) {
+                    select.value = this.produto.categoria.id;
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao carregar categorias:', error);
+        }
+    },
+    
+    preencherFormulario: function() {
+        if (!this.produto) return;
+        
+        // Preencher título
+        document.getElementById('produtoNome').textContent = this.produto.nome;
+        
+        // Preencher campos do formulário
+        const campos = ['nome', 'marca', 'descricao', 'descricao_curta', 'sku', 
+                       'codigo_barras', 'estado', 'peso', 'dimensoes', 'slug',
+                       'meta_titulo', 'meta_descricao', 'preco', 'preco_promocional',
+                       'quantidade'];
+        
+        campos.forEach(campo => {
+            const element = document.getElementById(campo);
+            if (element && this.produto[campo] !== undefined && this.produto[campo] !== null) {
+                element.value = this.produto[campo];
+            }
+        });
+        
+        // Preencher checkboxes
+        document.getElementById('publicado').checked = this.produto.publicado || false;
+        document.getElementById('destaque').checked = this.produto.destaque || false;
+        document.getElementById('em_promocao').checked = this.produto.em_promocao || false;
+        
+        // Preencher imagens
+        this.carregarImagens();
+        
+        // Atualizar displays de preço
+        this.atualizarDisplaysPreco();
+        
+        // Atualizar contadores SEO
+        this.atualizarContadoresSEO();
+    },
+    
+    carregarImagens: function() {
+        if (this.produto.imagem_principal_url) {
+            const preview = document.getElementById('preview_principal');
+            const icon = document.getElementById('icon_principal');
+            const text = document.getElementById('text_principal');
+            
+            preview.src = this.produto.imagem_principal_url;
+            preview.style.display = 'block';
+            icon.style.display = 'none';
+            text.style.display = 'none';
+        }
+        
+        if (this.produto.imagem_secundaria_url) {
+            const preview = document.getElementById('preview_secundaria');
+            const icon = document.getElementById('icon_secundaria');
+            const text = document.getElementById('text_secundaria');
+            
+            preview.src = this.produto.imagem_secundaria_url;
+            preview.style.display = 'block';
+            icon.style.display = 'none';
+            text.style.display = 'none';
+        }
+    },
+    
+    carregarEstatisticas: function() {
+        if (!this.produto) return;
+        
+        document.getElementById('stat-visualizacoes').textContent = 
+            this.produto.visualizacoes || 0;
+        document.getElementById('stat-vendas').textContent = 
+            this.produto.vendas || 0;
+        document.getElementById('stat-avaliacao').textContent = 
+            this.produto.avaliacao_media?.toFixed(1) || '0.0';
+        
+        // Carregar contagem de favoritos
+        this.carregarContagemFavoritos();
+    },
+    
+    carregarContagemFavoritos: async function() {
+        try {
+            const response = await fetch(`/api/produtos/${produtoId}/`);
+            const data = await response.json();
+            // Nota: API pode não retornar contagem de favoritos diretamente
+            // Você pode precisar ajustar conforme sua implementação
+        } catch (error) {
+            console.error('Erro ao carregar favoritos:', error);
+        }
+    },
+    
+    carregarHistoricoPrecos: async function() {
+        try {
+            const response = await fetch(`/api/produtos/${produtoId}/historico-precos/`);
+            const historico = await response.json();
+            const tbody = document.getElementById('historico-body');
+            
+            if (historico.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">
+                            Nenhum histórico de preços disponível
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            historico.forEach(item => {
+                html += `
+                    <tr>
+                        <td>${new Date(item.data_alteracao).toLocaleDateString('pt-BR')}</td>
+                        <td>R$ ${parseFloat(item.preco_antigo).toFixed(2).replace('.', ',')}</td>
+                        <td>R$ ${parseFloat(item.preco_novo).toFixed(2).replace('.', ',')}</td>
+                        <td>${item.alterado_por_nome || 'Sistema'}</td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        } catch (error) {
+            console.error('Erro ao carregar histórico:', error);
+        }
+    },
+    
+    atualizarDisplaysPreco: function() {
+        const precoAtual = this.produto.preco_atual || this.produto.preco;
+        const precoOriginal = this.produto.preco;
+        const desconto = this.produto.desconto_percentual || 0;
+        
+        document.getElementById('preco-atual-display').textContent = 
+            `R$ ${parseFloat(precoAtual).toFixed(2).replace('.', ',')}`;
+        document.getElementById('preco-original-display').textContent = 
+            `R$ ${parseFloat(precoOriginal).toFixed(2).replace('.', ',')}`;
+        document.getElementById('desconto-display').textContent = 
+            `${desconto}%`;
+    },
+    
+    atualizarContadoresSEO: function() {
+        const metaTitulo = document.getElementById('meta_titulo');
+        const metaDescricao = document.getElementById('meta_descricao');
+        const tituloCount = document.getElementById('meta_titulo_count');
+        const descricaoCount = document.getElementById('meta_descricao_count');
+        
+        if (metaTitulo) {
+            metaTitulo.addEventListener('input', function() {
+                tituloCount.textContent = `${this.value.length}/60 caracteres`;
+                if (this.value.length > 60) {
+                    tituloCount.classList.add('text-danger');
+                } else {
+                    tituloCount.classList.remove('text-danger');
+                }
+            });
+            metaTitulo.dispatchEvent(new Event('input'));
+        }
+        
+        if (metaDescricao) {
+            metaDescricao.addEventListener('input', function() {
+                descricaoCount.textContent = `${this.value.length}/160 caracteres`;
+                if (this.value.length > 160) {
+                    descricaoCount.classList.add('text-danger');
+                } else {
+                    descricaoCount.classList.remove('text-danger');
+                }
+            });
+            metaDescricao.dispatchEvent(new Event('input'));
+        }
+    },
+    
+    setupForm: function() {
+        const form = document.getElementById('form-produto');
+        form.addEventListener('submit', this.handleSubmit.bind(this));
+        
+        // Validar SKU único
+        const skuInput = document.getElementById('sku');
+        if (skuInput) {
+            let timeout;
+            skuInput.addEventListener('input', () => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    this.validarSKU(skuInput.value);
+                }, 500);
+            });
+        }
+        
+        // Atualizar preços quando alterados
+        document.getElementById('preco').addEventListener('input', () => {
+            this.atualizarDisplaysPrecoDinamico();
+        });
+        
+        document.getElementById('preco_promocional').addEventListener('input', () => {
+            this.atualizarDisplaysPrecoDinamico();
+        });
+    },
+    
+    setupEventListeners: function() {
+        // Botão deletar
+        document.getElementById('btn-deletar').addEventListener('click', () => {
+            this.deletarProduto();
+        });
+    },
+    
+    atualizarDisplaysPrecoDinamico: function() {
+        const preco = parseFloat(document.getElementById('preco').value) || 0;
+        const precoPromocional = parseFloat(document.getElementById('preco_promocional').value) || 0;
+        const precoAtual = precoPromocional > 0 ? precoPromocional : preco;
+        const desconto = precoPromocional > 0 && preco > 0 ? 
+            Math.round(((preco - precoPromocional) / preco) * 100) : 0;
+        
+        document.getElementById('preco-atual-display').textContent = 
+            `R$ ${precoAtual.toFixed(2).replace('.', ',')}`;
+        document.getElementById('preco-original-display').textContent = 
+            `R$ ${preco.toFixed(2).replace('.', ',')}`;
+        document.getElementById('desconto-display').textContent = 
+            `${desconto}%`;
+    },
+    
+    validarSKU: async function(sku) {
+        if (!sku.trim()) {
+            document.getElementById('sku-status').textContent = '';
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/produtos/?sku=${sku}`);
+            const data = await response.json();
+            const resultados = data.results || data;
+            
+            const skuStatus = document.getElementById('sku-status');
+            if (resultados.length > 0 && resultados[0].id !== produtoId) {
+                skuStatus.textContent = '⚠️ Este SKU já está em uso por outro produto';
+                skuStatus.className = 'form-text text-danger';
+            } else {
+                skuStatus.textContent = '✓ SKU disponível';
+                skuStatus.className = 'form-text text-success';
+            }
+        } catch (error) {
+            console.error('Erro ao validar SKU:', error);
+        }
+    },
+    
+    handleSubmit: async function(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const formData = new FormData(form);
+        
+        // Adicionar campos que não estão no formData
+        if (!formData.get('slug')) {
+            formData.delete('slug'); // Deixar auto-gerar
+        }
+        
+        // Mostrar loading
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Salvando...';
+        submitBtn.disabled = true;
+        
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await fetch(`/api/produtos/${produtoId}/`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': token ? `Bearer ${token}` : '',
+                    'X-CSRFToken': this.getCSRFToken()
+                },
+                body: formData
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                this.showAlert('Produto atualizado com sucesso!', 'success');
+                
+                // Recarregar dados
+                setTimeout(() => {
+                    this.loadProduto();
+                }, 1000);
+            } else {
+                const error = await response.json();
+                throw new Error(error.detail || error.message || 'Erro ao atualizar produto');
+            }
+        } catch (error) {
+            console.error('Erro ao salvar produto:', error);
+            this.showAlert(error.message, 'danger');
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    },
+    
+    deletarProduto: async function() {
+        if (!confirm('Tem certeza que deseja deletar este produto?\n\nEsta ação moverá o produto para a lixeira e poderá ser restaurado posteriormente.')) {
+            return;
+        }
+        
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await fetch(`/api/produtos/${produtoId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': token ? `Bearer ${token}` : '',
+                    'X-CSRFToken': this.getCSRFToken()
+                }
+            });
+            
+            if (response.ok) {
+                this.showAlert('Produto deletado com sucesso!', 'success');
+                setTimeout(() => {
+                    window.location.href = '/produtos/';
+                }, 1500);
+            } else {
+                throw new Error('Erro ao deletar produto');
+            }
+        } catch (error) {
+            console.error('Erro ao deletar produto:', error);
+            this.showAlert('Erro ao deletar produto', 'danger');
+        }
+    },
+    
+    previewImage: function(input, previewId, iconId, textId) {
+        const preview = document.getElementById(previewId);
+        const icon = document.getElementById(iconId);
+        const text = document.getElementById(textId);
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                if (icon) icon.style.display = 'none';
+                if (text) text.style.display = 'none';
+            };
+            
+            reader.readAsDataURL(input.files[0]);
+        }
+    },
+    
+    getCSRFToken: function() {
+        let cookieValue = null;
+        if (document.cookie) {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, 10) === ('csrftoken=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(10));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    },
+    
+    showAlert: function(message, type = 'info') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alertDiv.style.cssText = `
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            max-width: 500px;
+        `;
+        
+        const icon = type === 'success' ? 'check-circle' :
+                    type === 'danger' ? 'exclamation-circle' :
+                    type === 'warning' ? 'exclamation-triangle' : 'info-circle';
+        
+        alertDiv.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-${icon} me-2"></i>
+                <div class="flex-grow-1">${message}</div>
+                <button type="button" class="btn-close" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+};
+
+// Inicializar quando o DOM carregar
+document.addEventListener('DOMContentLoaded', function() {
+    produtoManager.init();
+});
+</script>
+{% endblock %}

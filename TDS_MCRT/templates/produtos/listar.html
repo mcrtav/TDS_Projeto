@@ -1,0 +1,785 @@
+{% extends 'base.html' %}
+
+{% block title %}Produtos - Sistema de Gestão{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .product-image {
+        height: 200px;
+        object-fit: cover;
+        width: 100%;
+        border-radius: 15px 15px 0 0;
+    }
+
+    .product-category {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+
+    .product-price {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #28a745;
+    }
+
+    .product-old-price {
+        font-size: 1rem;
+        text-decoration: line-through;
+        color: #6c757d;
+    }
+
+    .product-discount {
+        background: #dc3545;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: bold;
+    }
+
+    .product-actions {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+    }
+
+    .filter-sidebar {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 25px;
+        height: fit-content;
+    }
+
+    .search-box {
+        position: relative;
+        margin-bottom: 30px;
+    }
+
+    .search-box input {
+        padding-left: 50px;
+        border-radius: 25px;
+        height: 50px;
+    }
+
+    .search-box .search-icon {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+    }
+
+    .pagination .page-link {
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 5px;
+        border: none;
+        color: #495057;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+    }
+
+    .empty-state i {
+        font-size: 5rem;
+        color: #dee2e6;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar de Filtros -->
+        <div class="col-lg-3 mb-4">
+            <div class="filter-sidebar">
+                <h5 class="mb-4"><i class="fas fa-filter me-2"></i> Filtros</h5>
+
+                <!-- Busca -->
+                <div class="search-box">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Buscar produtos...">
+                </div>
+
+                <!-- Categorias -->
+                <div class="mb-4">
+                    <h6><i class="fas fa-tags me-2"></i> Categorias</h6>
+                    <div id="categorias-list">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Carregando...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Marcas -->
+                <div class="mb-4">
+                    <h6><i class="fas fa-industry me-2"></i> Marca</h6>
+                    <select class="form-select" id="marcaFilter">
+                        <option value="">Todas as marcas</option>
+                    </select>
+                </div>
+
+                <!-- Estado -->
+                <div class="mb-4">
+                    <h6><i class="fas fa-certificate me-2"></i> Estado</h6>
+                    <select class="form-select" id="estadoFilter">
+                        <option value="">Todos os estados</option>
+                        <option value="novo">Novo</option>
+                        <option value="usado">Usado</option>
+                        <option value="seminovo">Seminovo</option>
+                        <option value="recondicionado">Recondicionado</option>
+                    </select>
+                </div>
+
+                <!-- Preço -->
+                <div class="mb-4">
+                    <h6><i class="fas fa-dollar-sign me-2"></i> Faixa de Preço</h6>
+                    <div class="row">
+                        <div class="col-6">
+                            <input type="number" class="form-control" id="minPrice" placeholder="Mín" min="0"
+                                step="0.01">
+                        </div>
+                        <div class="col-6">
+                            <input type="number" class="form-control" id="maxPrice" placeholder="Máx" min="0"
+                                step="0.01">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtros Especiais -->
+                <div class="mb-4">
+                    <h6><i class="fas fa-star me-2"></i> Filtros Especiais</h6>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="destaqueFilter">
+                        <label class="form-check-label" for="destaqueFilter">
+                            Apenas em destaque
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="promocaoFilter">
+                        <label class="form-check-label" for="promocaoFilter">
+                            Apenas em promoção
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="estoqueFilter">
+                        <label class="form-check-label" for="estoqueFilter">
+                            Apenas com estoque
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Ordenação -->
+                <div class="mb-4">
+                    <h6><i class="fas fa-sort me-2"></i> Ordenar por</h6>
+                    <select class="form-select" id="sortFilter">
+                        <option value="-data_criacao">Mais recentes</option>
+                        <option value="nome">Nome (A-Z)</option>
+                        <option value="-nome">Nome (Z-A)</option>
+                        <option value="preco">Preço (menor)</option>
+                        <option value="-preco">Preço (maior)</option>
+                        <option value="-avaliacao_media">Melhor avaliados</option>
+                    </select>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" onclick="applyFilters()">
+                        <i class="fas fa-search me-2"></i> Aplicar Filtros
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                        <i class="fas fa-times me-2"></i> Limpar Filtros
+                    </button>
+                </div>
+            </div>
+
+            <!-- Estatísticas -->
+            <div class="mt-4 p-4 bg-white rounded shadow-sm">
+                <h6><i class="fas fa-chart-bar me-2"></i> Estatísticas</h6>
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Produtos:</span>
+                        <span id="stats-total">0</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Em promoção:</span>
+                        <span id="stats-promocao">0</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Em destaque:</span>
+                        <span id="stats-destaque">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Produtos -->
+        <div class="col-lg-9">
+            <!-- Header com Controles -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-0">
+                        <i class="fas fa-shopping-bag me-2"></i> Produtos
+                    </h2>
+                    <p class="text-muted mb-0" id="productsCount">Carregando...</p>
+                </div>
+
+                <div>
+                    {% if user.is_authenticated and user.is_staff %}
+                    <a href="/produtos/novo/" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i> Novo Produto
+                    </a>
+                    {% endif %}
+                    <div class="btn-group ms-2">
+                        <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="fas fa-download me-2"></i> Exportar
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="exportToCSV()">CSV</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="exportToJSON()">JSON</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Produtos -->
+            <div class="row" id="productsContainer">
+                <!-- Produtos serão carregados aqui via JavaScript -->
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Carregando produtos...</span>
+                        </div>
+                        <p class="mt-3">Carregando produtos...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paginação -->
+            <nav aria-label="Paginação" class="mt-5">
+                <ul class="pagination justify-content-center" id="pagination">
+                    <!-- Paginação será gerada via JavaScript -->
+                </ul>
+            </nav>
+
+            <!-- Estado Vazio -->
+            <div class="empty-state d-none" id="emptyState">
+                <i class="fas fa-box-open"></i>
+                <h3 class="mt-3">Nenhum produto encontrado</h3>
+                <p class="text-muted">Tente ajustar seus filtros ou buscar por outros termos.</p>
+                <button class="btn btn-primary mt-3" onclick="clearFilters()">
+                    <i class="fas fa-times me-2"></i> Limpar Filtros
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentPage = 1;
+    let totalPages = 1;
+    let allProducts = [];
+    let categories = [];
+    let brands = [];
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', function () {
+        loadCategories();
+        loadBrands();
+        loadProducts();
+        setupSearch();
+    });
+
+    // Carregar categorias
+    function loadCategories() {
+        fetch('/api/categorias/ativas/')
+            .then(response => response.json())
+            .then(data => {
+                categories = data.results || data;
+                const container = document.getElementById('categorias-list');
+                container.innerHTML = '';
+
+                categories.forEach(categoria => {
+                    const div = document.createElement('div');
+                    div.className = 'form-check';
+                    div.innerHTML = `
+                    <input class="form-check-input" type="checkbox" value="${categoria.id}" id="cat-${categoria.id}">
+                    <label class="form-check-label" for="cat-${categoria.id}">
+                        <i class="fas fa-tag me-1" style="color: ${categoria.cor || '#6c757d'}"></i>
+                        ${categoria.nome}
+                    </label>
+                `;
+                    container.appendChild(div);
+                });
+            })
+            .catch(error => {
+                console.error('Erro ao carregar categorias:', error);
+            });
+    }
+
+    // Carregar marcas
+    function loadBrands() {
+        fetch('/api/produtos/filter/')
+            .then(response => response.json())
+            .then(data => {
+                brands = data.marcas || [];
+                const select = document.getElementById('marcaFilter');
+
+                brands.forEach(marca => {
+                    const option = document.createElement('option');
+                    option.value = marca;
+                    option.textContent = marca;
+                    select.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Erro ao carregar marcas:', error);
+            });
+    }
+
+    // Carregar produtos
+    function loadProducts(page = 1) {
+        currentPage = page;
+
+        // Construir URL com parâmetros
+        const params = new URLSearchParams();
+        params.append('page', page);
+        params.append('page_size', 12);
+
+        // Adicionar filtros
+        const search = document.getElementById('searchInput').value;
+        if (search) params.append('search', search);
+
+        const marca = document.getElementById('marcaFilter').value;
+        if (marca) params.append('marca', marca);
+
+        const estado = document.getElementById('estadoFilter').value;
+        if (estado) params.append('estado', estado);
+
+        const minPrice = document.getElementById('minPrice').value;
+        if (minPrice) params.append('preco_min', minPrice);
+
+        const maxPrice = document.getElementById('maxPrice').value;
+        if (maxPrice) params.append('preco_max', maxPrice);
+
+        const destaque = document.getElementById('destaqueFilter').checked;
+        if (destaque) params.append('destaque', 'true');
+
+        const promocao = document.getElementById('promocaoFilter').checked;
+        if (promocao) params.append('em_promocao', 'true');
+
+        const estoque = document.getElementById('estoqueFilter').checked;
+        if (estoque) params.append('quantidade_min', 1);
+
+        // Categorias selecionadas
+        const categoriasSelecionadas = [];
+        document.querySelectorAll('#categorias-list input:checked').forEach(input => {
+            categoriasSelecionadas.push(input.value);
+        });
+        if (categoriasSelecionadas.length > 0) {
+            params.append('categoria', categoriasSelecionadas.join(','));
+        }
+
+        // Ordenação
+        const sort = document.getElementById('sortFilter').value;
+        if (sort) params.append('ordering', sort);
+
+        // Mostrar loading
+        document.getElementById('productsContainer').innerHTML = `
+        <div class="col-12">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Carregando produtos...</span>
+                </div>
+                <p class="mt-3">Carregando produtos...</p>
+            </div>
+        </div>
+    `;
+
+        // Fazer requisição
+        fetch(`/api/produtos/?${params.toString()}`)
+            .then(response => response.json())
+            .then(data => {
+                // Verificar estrutura da resposta
+                allProducts = data.results || data;
+                if (!Array.isArray(allProducts)) {
+                    allProducts = [];
+                }
+                totalPages = Math.ceil(data.count / 12) || 1;
+
+                updateProductsDisplay();
+                updatePagination();
+                updateStats();
+            })
+            .catch(error => {
+                console.error('Erro ao carregar produtos:', error);
+                document.getElementById('productsContainer').innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Erro ao carregar produtos. Tente novamente.
+                    </div>
+                </div>
+            `;
+            });
+    }
+
+    // Atualizar display dos produtos
+    function updateProductsDisplay() {
+        const container = document.getElementById('productsContainer');
+
+        const produtosArray = Array.isArray(allProducts) ? allProducts : (allProducts.results || []);
+        if (produtosArray.length === 0) {
+            container.innerHTML = '';
+            document.getElementById('emptyState').classList.remove('d-none');
+            document.getElementById('productsCount').textContent = 'Nenhum produto encontrado';
+            return;
+        }
+
+        document.getElementById('emptyState').classList.add('d-none');
+        document.getElementById('productsCount').textContent =
+            `${allProducts.length} produto${allProducts.length !== 1 ? 's' : ''} encontrado${allProducts.length !== 1 ? 's' : ''}`;
+
+        container.innerHTML = '';
+
+        allProducts.forEach(produto => {
+            const col = document.createElement('div');
+            col.className = 'col-md-6 col-lg-4 mb-4';
+
+            const isFavorito = produto.is_favorito || false;
+            const isPromocao = produto.em_promocao || (produto.preco_promocional && produto.preco_promocional < produto.preco);
+            const desconto = produto.desconto_percentual ||
+                (isPromocao ? Math.round(((produto.preco - produto.preco_promocional) / produto.preco) * 100) : 0);
+            const precoAtual = produto.preco_atual || (isPromocao ? produto.preco_promocional : produto.preco);
+
+            col.innerHTML = `
+            <div class="card product-card">
+                <div class="position-relative">
+                    <img src="${produto.imagem_principal_url || '/static/img/produto_padrao.png'}" 
+                         class="product-image" 
+                         alt="${produto.nome}"
+                         onerror="this.src='/static/img/produto_padrao.png'">
+                    
+                    ${isPromocao ? `
+                    <div class="position-absolute top-0 start-0 m-3">
+                        <span class="product-discount">-${desconto}%</span>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="product-actions">
+                        <button class="btn btn-sm ${isFavorito ? 'btn-danger' : 'btn-outline-danger'}" 
+                                onclick="toggleFavorite('${produto.id}', this)">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="product-category mb-2">
+                        <i class="fas fa-tag me-1"></i> ${produto.categoria_nome || 'Sem categoria'}
+                    </div>
+                    
+                    <h5 class="card-title mb-2">${produto.nome}</h5>
+                    
+                    <p class="card-text text-muted small mb-3">
+                        ${produto.descricao_curta || produto.descricao?.substring(0, 100) + '...' || 'Sem descrição'}
+                    </p>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="product-price">
+                                R$ ${parseFloat(precoAtual).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </div>
+                            ${isPromocao ? `
+                            <div class="product-old-price">
+                                R$ ${parseFloat(produto.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="text-end">
+                            <div class="mb-1">
+                                ${produto.avaliacao_media ? `
+                                <span class="text-warning">
+                                    ${'★'.repeat(Math.round(produto.avaliacao_media))}${'☆'.repeat(5 - Math.round(produto.avaliacao_media))}
+                                </span>
+                                <small class="text-muted">(${produto.avaliacao_media})</small>
+                                ` : '<small class="text-muted">Sem avaliações</small>'}
+                            </div>
+                            
+                            <div>
+                                ${produto.disponivel ?
+                    '<span class="badge bg-success"><i class="fas fa-check me-1"></i> Disponível</span>' :
+                    '<span class="badge bg-danger"><i class="fas fa-times me-1"></i> Indisponível</span>'}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="/produtos/${produto.id}/" class="btn btn-primary">
+                            <i class="fas fa-eye me-2"></i> Ver Detalhes
+                        </a>
+                        ${{% if user.is_authenticated and user.is_staff %}`
+                        <div class="btn-group">
+                            <a href="/produtos/${produto.id}/editar/" class="btn btn-outline-secondary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button class="btn btn-outline-danger" onclick="deleteProduct('${produto.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        `{% else %} ''{% endif %}}
+                    </div >
+                </div >
+            </div >
+        `;
+        
+        container.appendChild(col);
+    });
+}
+
+// Atualizar paginação
+function updatePagination() {
+    const pagination = document.getElementById('pagination');
+    pagination.innerHTML = '';
+    
+    // Botão anterior
+    const prevLi = document.createElement('li');
+    prevLi.className = page - item ${ currentPage === 1 ? 'disabled' : '' } ;
+    prevLi.innerHTML = 
+        < a class="page-link" href = "#" ${ currentPage === 1 ? 'tabindex="-1" aria-disabled="true"' : '' }
+    onclick = "loadProducts(${currentPage - 1})" >
+        <i class="fas fa-chevron-left"></i>
+        </a >
+        ;
+    pagination.appendChild(prevLi);
+    
+    // Números das páginas
+    const startPage = Math.max(1, currentPage - 2);
+    const endPage = Math.min(totalPages, startPage + 4);
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const li = document.createElement('li');
+        li.className = `page - item ${ i === currentPage ? 'active' : '' } `;
+        li.innerHTML = `< a class="page-link" href = "#" onclick = "loadProducts(${i})" > ${ i }</a > `;
+        pagination.appendChild(li);
+    }
+    
+    // Botão próximo
+    const nextLi = document.createElement('li');
+    nextLi.className = `page - item ${ currentPage === totalPages ? 'disabled' : '' } `;
+    nextLi.innerHTML = `
+        < a class="page-link" href = "#" ${ currentPage === totalPages ? 'tabindex="-1" aria-disabled="true"' : '' }
+    onclick = "loadProducts(${currentPage + 1})" >
+        <i class="fas fa-chevron-right"></i>
+        </a >
+        `;
+    pagination.appendChild(nextLi);
+}
+
+// Atualizar estatísticas
+function updateStats() {
+    fetch('/api/produtos/estatisticas/')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('stats-total').textContent = data.total_produtos || 0;
+            document.getElementById('stats-promocao').textContent = data.produtos_em_promocao || 0;
+            document.getElementById('stats-destaque').textContent = 
+                data.produtos_destaque || allProducts.filter(p => p.destaque).length || 0;
+        })
+        .catch(error => {
+            console.error('Erro ao carregar estatísticas:', error);
+        });
+}
+
+// Aplicar filtros
+function applyFilters() {
+    loadProducts(1);
+}
+
+// Limpar filtros
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('marcaFilter').value = '';
+    document.getElementById('estadoFilter').value = '';
+    document.getElementById('minPrice').value = '';
+    document.getElementById('maxPrice').value = '';
+    document.getElementById('destaqueFilter').checked = false;
+    document.getElementById('promocaoFilter').checked = false;
+    document.getElementById('estoqueFilter').checked = false;
+    document.getElementById('sortFilter').value = '-data_criacao';
+    
+    document.querySelectorAll('#categorias-list input:checked').forEach(input => {
+        input.checked = false;
+    });
+    
+    loadProducts(1);
+}
+
+// Configurar busca em tempo real
+function setupSearch() {
+    let searchTimeout;
+    document.getElementById('searchInput').addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            loadProducts(1);
+        }, 500);
+    });
+}
+
+// Alternar favorito
+function toggleFavorite(produtoId, button) {
+    const isFavorito = button.classList.contains('btn-danger');
+    
+    if (isFavorito) {
+        // Remover dos favoritos
+        fetch(`/ api / produtos / ${ produtoId } /desfavoritar/`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                button.classList.remove('btn-danger');
+                button.classList.add('btn-outline-danger');
+                showToast('Produto removido dos favoritos', 'success');
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao remover favorito:', error);
+            showToast('Erro ao remover dos favoritos', 'error');
+        });
+    } else {
+        // Adicionar aos favoritos
+        fetch(`/ api / produtos / ${ produtoId } /favoritar/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+            },
+            body: JSON.stringify({ notificar_promocao: true })
+        })
+        .then(response => {
+            if (response.ok) {
+                button.classList.remove('btn-outline-danger');
+                button.classList.add('btn-danger');
+                showToast('Produto adicionado aos favoritos', 'success');
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao favoritar:', error);
+            showToast('Erro ao favoritar produto', 'error');
+        });
+    }
+}
+
+// Deletar produto (apenas admin)
+function deleteProduct(produtoId) {
+    if (!confirm('Tem certeza que deseja deletar este produto?')) {
+        return;
+    }
+    
+    fetch(`/ api / produtos / ${ produtoId }/`, {
+    method: 'DELETE',
+        headers: {
+        'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+    }
+    })
+    .then(response => {
+        if (response.ok) {
+            showToast('Produto deletado com sucesso', 'success');
+            loadProducts(currentPage);
+        } else {
+            throw new Error('Erro ao deletar produto');
+        }
+    })
+        .catch(error => {
+            console.error('Erro ao deletar produto:', error);
+            showToast('Erro ao deletar produto', 'error');
+        });
+}
+
+    // Exportar para CSV
+    function exportToCSV() {
+        const params = new URLSearchParams(window.location.search);
+        params.append('format', 'csv');
+
+        window.open(`/api/produtos/?${params.toString()}`, '_blank');
+    }
+
+    // Exportar para JSON
+    function exportToJSON() {
+        const params = new URLSearchParams(window.location.search);
+        params.delete('page');
+        params.delete('page_size');
+
+        fetch(`/api/produtos/?${params.toString()}`)
+            .then(response => response.json())
+            .then(data => {
+                const jsonString = JSON.stringify(data.results || data, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'produtos.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                console.error('Erro ao exportar JSON:', error);
+                showToast('Erro ao exportar dados', 'error');
+            });
+    }
+
+    // Mostrar toast
+    function showToast(message, type = 'info') {
+        // Implementação simples de toast
+        const toast = document.createElement('div');
+        toast.className = `toast show position-fixed top-0 end-0 m-3 bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} text-white`;
+        toast.style.zIndex = '1060';
+        toast.innerHTML = `
+        <div class="toast-body">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+            ${message}
+        </div>
+    `;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+</script>
+{% endblock %}

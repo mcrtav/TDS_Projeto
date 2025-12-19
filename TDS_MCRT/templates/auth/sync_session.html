@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sincronizar Sessão</title>
+    <script>
+        // Este script sincroniza a sessão Django com o frontend
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se já temos tokens JWT
+            const jwtAccess = localStorage.getItem('jwt_access');
+            const jwtRefresh = localStorage.getItem('jwt_refresh');
+            
+            if (jwtAccess && jwtRefresh) {
+                // Sincronizar com Django via AJAX
+                fetch('/api/usuarios/hybrid-auth/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwtAccess}`
+                    },
+                    body: JSON.stringify({}),
+                    credentials: 'include' // Importante para cookies/sessão
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Sessão sincronizada:', data);
+                    // Redirecionar para a página inicial
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 1000);
+                })
+                .catch(error => {
+                    console.error('Erro ao sincronizar sessão:', error);
+                    // Redirecionar para login
+                    window.location.href = '/login/';
+                });
+            } else {
+                // Não há tokens, redirecionar para login
+                window.location.href = '/login/';
+            }
+        });
+    </script>
+</head>
+<body>
+    <div style="text-align: center; margin-top: 50px;">
+        <h2>Sincronizando sessão...</h2>
+        <p>Por favor, aguarde enquanto sincronizamos sua autenticação.</p>
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+    </div>
+</body>
+</html>

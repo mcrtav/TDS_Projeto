@@ -1,0 +1,1160 @@
+{% extends 'frontend/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-edit me-2"></i> Editar Perfil
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form id="editar-perfil-form" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-4">
+                                <!-- Container da foto com sistema anti-piscamento -->
+                                <div class="profile-edit-container mb-3 position-relative">
+                                    <!-- Placeholder enquanto carrega -->
+                                    <div class="photo-placeholder rounded-circle d-flex flex-column align-items-center justify-content-center" 
+                                         id="photo-placeholder">
+                                        <i class="fas fa-user fa-4x text-muted"></i>
+                                        <p class="mt-2 text-muted small">Carregando...</p>
+                                    </div>
+                                    
+                                    <!-- Imagem real (carregada por JavaScript) -->
+                                    <img src="{{ user.get_foto_url }}" 
+                                         class="rounded-circle profile-edit-img" 
+                                         alt="Foto de perfil"
+                                         id="foto-preview"
+                                         style="opacity: 0;"
+                                         data-src="{{ user.get_foto_url }}"
+                                         onerror="this.dataset.error='true'">
+                                    
+                                    <!-- Overlay para trocar foto -->
+                                    <div class="photo-overlay rounded-circle d-flex flex-column align-items-center justify-content-center" 
+                                         onclick="document.getElementById('foto').click()">
+                                        <i class="fas fa-camera fa-2x mb-2"></i>
+                                        <p class="mb-0 small">Trocar Foto</p>
+                                    </div>
+                                    
+                                    <!-- Input file oculto -->
+                                    <input type="file" 
+                                           class="form-control d-none" 
+                                           id="foto" 
+                                           name="foto"
+                                           accept="image/*">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="foto" class="form-label">Alterar Foto</label>
+                                    <div class="input-group">
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="foto-name" 
+                                               placeholder="Nenhuma imagem selecionada"
+                                               readonly>
+                                        <button class="btn btn-outline-secondary" 
+                                                type="button"
+                                                onclick="document.getElementById('foto').click()">
+                                            <i class="fas fa-folder-open"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text small mt-1">
+                                        Formatos: JPG, PNG, GIF. Máx: 10MB.
+                                    </div>
+                                </div>
+                                
+                                <!-- Status da foto -->
+                                <div id="foto-status" class="alert alert-info d-none small mb-0">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    <span id="foto-status-text"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-8">
+                                <h5 class="mb-3 border-bottom pb-2">
+                                    <i class="fas fa-id-card me-2"></i> Informações Pessoais
+                                </h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="nome" class="form-label">
+                                            <i class="fas fa-user me-1"></i> Nome Completo *
+                                        </label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="nome" 
+                                               name="nome"
+                                               value="{{ user.nome }}"
+                                               required
+                                               autocomplete="name">
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">
+                                            <i class="fas fa-envelope me-1"></i> E-mail *
+                                        </label>
+                                        <input type="email" 
+                                               class="form-control" 
+                                               id="email" 
+                                               name="email"
+                                               value="{{ user.email }}"
+                                               required
+                                               autocomplete="email">
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-key me-2"></i>
+                                    Para alterar sua senha, utilize a opção 
+                                    <a href="/recuperar-senha" class="alert-link">"Alterar Senha"</a> 
+                                    no menu ou no seu perfil.
+                                </div>
+                                
+                                <h5 class="mb-3 mt-4 border-bottom pb-2">
+                                    <i class="fas fa-map-marker-alt me-2"></i> Endereço (Opcional)
+                                </h5>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-8">
+                                        <label for="cep" class="form-label">
+                                            <i class="fas fa-map-pin me-1"></i> CEP
+                                        </label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="cep" 
+                                               name="cep"
+                                               value="{{ user.cep|default:'' }}"
+                                               placeholder="00000-000"
+                                               autocomplete="postal-code">
+                                    </div>
+                                    <div class="col-md-4 d-flex align-items-end">
+                                        <button type="button" 
+                                                class="btn btn-outline-primary w-100"
+                                                id="btn-buscar-cep"
+                                                onclick="buscarCEP()">
+                                            <i class="fas fa-search me-1"></i> Buscar CEP
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="logradouro" class="form-label">
+                                        <i class="fas fa-road me-1"></i> Logradouro
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="logradouro" 
+                                           name="logradouro"
+                                           value="{{ user.logradouro|default:'' }}"
+                                           placeholder="Rua, Avenida, etc."
+                                           autocomplete="address-line1">
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label for="numero" class="form-label">
+                                            <i class="fas fa-hashtag me-1"></i> Número
+                                        </label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="numero" 
+                                               name="numero"
+                                               value="{{ user.numero|default:'' }}"
+                                               placeholder="123"
+                                               autocomplete="address-line2">
+                                    </div>
+                                    <div class="col-md-8">
+                                        <label for="complemento" class="form-label">
+                                            <i class="fas fa-building me-1"></i> Complemento
+                                        </label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="complemento" 
+                                               name="complemento"
+                                               value="{{ user.complemento|default:'' }}"
+                                               placeholder="Apto, Bloco, etc.">
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="bairro" class="form-label">
+                                            <i class="fas fa-map me-1"></i> Bairro
+                                        </label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="bairro" 
+                                               name="bairro"
+                                               value="{{ user.bairro|default:'' }}"
+                                               placeholder="Nome do bairro">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="cidade" class="form-label">
+                                            <i class="fas fa-city me-1"></i> Cidade
+                                        </label>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="cidade" 
+                                               name="cidade"
+                                               value="{{ user.cidade|default:'' }}"
+                                               placeholder="Nome da cidade"
+                                               autocomplete="address-level2">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="estado" class="form-label">
+                                            <i class="fas fa-flag me-1"></i> Estado
+                                        </label>
+                                        <input type="text" 
+                                               class="form-control text-uppercase" 
+                                               id="estado" 
+                                               name="estado"
+                                               value="{{ user.estado|default:'' }}"
+                                               maxlength="2"
+                                               placeholder="UF"
+                                               autocomplete="address-level1">
+                                    </div>
+                                </div>
+                                
+                                <!-- Campos ocultos para dados originais -->
+                                <input type="hidden" id="original-foto-url" value="{{ user.get_foto_url }}">
+                                <input type="hidden" id="original-nome" value="{{ user.nome }}">
+                                <input type="hidden" id="original-email" value="{{ user.email }}">
+                            </div>
+                        </div>
+                        
+                        <!-- Mensagens de feedback -->
+                        <div id="form-error" class="alert alert-danger d-none mb-3">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <span id="form-error-text"></span>
+                        </div>
+                        
+                        <div id="form-success" class="alert alert-success d-none mb-3">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <span id="form-success-text"></span>
+                        </div>
+                        
+                        <div id="form-warning" class="alert alert-warning d-none mb-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span id="form-warning-text"></span>
+                        </div>
+                        
+                        <!-- Progresso do upload -->
+                        <div id="upload-progress" class="d-none mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Enviando foto...</span>
+                                <span id="upload-percent">0%</span>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div id="upload-progress-bar" 
+                                     class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" 
+                                     style="width: 0%">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="/perfil" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i> Voltar ao Perfil
+                            </a>
+                            
+                            <div>
+                                <button type="button" 
+                                        class="btn btn-outline-danger me-2"
+                                        onclick="resetForm()">
+                                    <i class="fas fa-undo me-2"></i> Desfazer
+                                </button>
+                                <button type="submit" 
+                                        class="btn btn-primary"
+                                        id="submit-btn">
+                                    <i class="fas fa-save me-2"></i> Salvar Alterações
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos específicos para esta página -->
+<style>
+/* Container da foto */
+.profile-edit-container {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    background-color: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.profile-edit-container:hover {
+    border-color: #6c757d;
+    transform: translateY(-2px);
+}
+
+/* Placeholder */
+.photo-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    z-index: 1;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+.photo-placeholder.fade-out {
+    opacity: 0;
+}
+
+/* Imagem */
+.profile-edit-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 2;
+    transition: opacity 0.5s ease, transform 0.3s ease;
+    transform: scale(1);
+}
+
+.profile-edit-img.loaded {
+    opacity: 1;
+}
+
+.profile-edit-img.preview {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+/* Overlay */
+.photo-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+}
+
+.profile-edit-container:hover .photo-overlay {
+    opacity: 1;
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes highlight {
+    0% { background-color: rgba(40, 167, 69, 0.1); }
+    50% { background-color: rgba(40, 167, 69, 0.3); }
+    100% { background-color: transparent; }
+}
+
+/* Estados */
+.highlight {
+    animation: highlight 1s ease;
+}
+
+.pulsing {
+    animation: pulse 2s infinite;
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .profile-edit-container {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .photo-placeholder i {
+        font-size: 3rem;
+    }
+}
+
+/* Botões */
+#submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Campos com erro */
+.is-invalid {
+    border-color: #dc3545;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+/* Campos com sucesso */
+.is-valid {
+    border-color: #28a745;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+</style>
+
+<!-- JavaScript para esta página -->
+<script>
+// Variáveis globais
+let originalData = {};
+let isSubmitting = false;
+let isUploading = false;
+let currentFile = null;
+
+// Inicialização quando o DOM carregar
+document.addEventListener('DOMContentLoaded', function() {
+    // Salvar dados originais
+    saveOriginalData();
+    
+    // Inicializar componentes
+    initializePhoto();
+    setupEventListeners();
+    setupFormValidation();
+    
+    console.log('Página de edição de perfil inicializada');
+});
+
+// Salvar dados originais
+function saveOriginalData() {
+    originalData = {
+        nome: document.getElementById('nome').value,
+        email: document.getElementById('email').value,
+        cep: document.getElementById('cep').value,
+        logradouro: document.getElementById('logradouro').value,
+        numero: document.getElementById('numero').value,
+        complemento: document.getElementById('complemento').value,
+        bairro: document.getElementById('bairro').value,
+        cidade: document.getElementById('cidade').value,
+        estado: document.getElementById('estado').value,
+        fotoUrl: document.getElementById('original-foto-url').value
+    };
+}
+
+// Inicializar foto
+function initializePhoto() {
+    const fotoPreview = document.getElementById('foto-preview');
+    const placeholder = document.getElementById('photo-placeholder');
+    const fotoInput = document.getElementById('foto');
+    const fotoName = document.getElementById('foto-name');
+    
+    // Configurar input file
+    if (fotoInput) {
+        fotoInput.addEventListener('change', function(e) {
+            handleFileSelect(e);
+        });
+    }
+    
+    // Carregar imagem com otimização
+    if (fotoPreview) {
+        const imgSrc = fotoPreview.dataset.src || fotoPreview.src;
+        
+        if (imgSrc && imgSrc !== '' && imgSrc !== '#') {
+            // Usar Image() para pré-carregamento controlado
+            const tempImg = new Image();
+            tempImg.crossOrigin = 'anonymous';
+            
+            tempImg.onload = function() {
+                // Quando carregar, mostrar imagem
+                setTimeout(() => {
+                    fotoPreview.src = imgSrc;
+                    fotoPreview.style.opacity = '1';
+                    fotoPreview.classList.add('loaded');
+                    
+                    // Esconder placeholder com fade out
+                    if (placeholder) {
+                        placeholder.classList.add('fade-out');
+                        setTimeout(() => {
+                            placeholder.style.display = 'none';
+                        }, 500);
+                    }
+                }, 100);
+            };
+            
+            tempImg.onerror = function() {
+                // Em caso de erro, usar imagem padrão
+                setTimeout(() => {
+                    fotoPreview.src = '/static/frontend/img/usuario_padrao.png';
+                    fotoPreview.style.opacity = '1';
+                    fotoPreview.classList.add('loaded');
+                    
+                    if (placeholder) {
+                        placeholder.classList.add('fade-out');
+                        setTimeout(() => {
+                            placeholder.style.display = 'none';
+                        }, 500);
+                    }
+                }, 100);
+            };
+            
+            tempImg.src = imgSrc;
+            
+            // Timeout de segurança
+            setTimeout(() => {
+                if (!fotoPreview.classList.contains('loaded')) {
+                    fotoPreview.style.opacity = '1';
+                    fotoPreview.classList.add('loaded');
+                    if (placeholder) placeholder.style.display = 'none';
+                }
+            }, 2000);
+        } else {
+            // Sem imagem, mostrar placeholder
+            fotoPreview.style.display = 'none';
+            if (placeholder) {
+                placeholder.style.display = 'flex';
+            }
+        }
+    }
+}
+
+// Configurar listeners de eventos
+function setupEventListeners() {
+    const form = document.getElementById('editar-perfil-form');
+    const fotoInput = document.getElementById('foto');
+    const fotoName = document.getElementById('foto-name');
+    
+    // Form submit
+    if (form) {
+        form.addEventListener('submit', handleFormSubmit);
+    }
+    
+    // Input file
+    if (fotoInput && fotoName) {
+        fotoInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                fotoName.value = this.files[0].name;
+            } else {
+                fotoName.value = '';
+            }
+        });
+    }
+    
+    // Validação em tempo real
+    const fields = ['nome', 'email', 'cep'];
+    fields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('blur', validateField);
+        }
+    });
+}
+
+// Configurar validação de formulário
+function setupFormValidation() {
+    // Adicionar validação customizada
+    const forms = document.querySelectorAll('.needs-validation');
+    
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            form.classList.add('was-validated');
+        }, false);
+    });
+}
+
+// Manipular seleção de arquivo
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    const fotoName = document.getElementById('foto-name');
+    const statusDiv = document.getElementById('foto-status');
+    const statusText = document.getElementById('foto-status-text');
+    
+    if (!file) {
+        if (fotoName) fotoName.value = '';
+        return;
+    }
+    
+    // Validar arquivo
+    if (!validateFile(file)) {
+        event.target.value = '';
+        if (fotoName) fotoName.value = '';
+        return;
+    }
+    
+    // Atualizar nome do arquivo
+    if (fotoName) {
+        fotoName.value = file.name;
+    }
+    
+    // Mostrar status
+    if (statusDiv && statusText) {
+        statusText.textContent = 'Imagem selecionada: ' + file.name;
+        statusDiv.classList.remove('d-none');
+        statusDiv.classList.remove('alert-danger');
+        statusDiv.classList.add('alert-success');
+    }
+    
+    // Fazer preview
+    previewFile(file);
+    
+    // Salvar arquivo atual
+    currentFile = file;
+}
+
+// Validar arquivo
+function validateFile(file) {
+    const statusDiv = document.getElementById('foto-status');
+    const statusText = document.getElementById('foto-status-text');
+    
+    // Tipos permitidos
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    
+    // Tamanho máximo (10MB)
+    const maxSize = 10 * 1024 * 1024;
+    
+    let errors = [];
+    
+    if (!allowedTypes.includes(file.type)) {
+        errors.push('Formato inválido. Use JPG, PNG, GIF ou WebP.');
+    }
+    
+    if (file.size > maxSize) {
+        errors.push('Tamanho máximo: 10MB. Seu arquivo: ' + formatBytes(file.size));
+    }
+    
+    if (errors.length > 0) {
+        if (statusDiv && statusText) {
+            statusText.textContent = errors.join(' ');
+            statusDiv.classList.remove('d-none');
+            statusDiv.classList.remove('alert-success');
+            statusDiv.classList.add('alert-danger');
+        }
+        return false;
+    }
+    
+    return true;
+}
+
+// Formatar bytes para leitura humana
+function formatBytes(bytes, decimals = 2) {
+    if (bytes === 0) return '0 Bytes';
+    
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
+// Preview do arquivo
+function previewFile(file) {
+    const fotoPreview = document.getElementById('foto-preview');
+    const placeholder = document.getElementById('photo-placeholder');
+    
+    if (!fotoPreview) return;
+    
+    // Mostrar placeholder durante carregamento
+    if (placeholder) {
+        placeholder.style.display = 'flex';
+        placeholder.classList.remove('fade-out');
+        placeholder.innerHTML = '<i class="fas fa-spinner fa-spin fa-3x"></i><p class="mt-2">Processando...</p>';
+    }
+    
+    // Ler arquivo
+    const reader = new FileReader();
+    
+    reader.onloadstart = function() {
+        fotoPreview.style.opacity = '0';
+    };
+    
+    reader.onload = function(e) {
+        // Transição suave
+        setTimeout(() => {
+            fotoPreview.src = e.target.result;
+            fotoPreview.style.opacity = '1';
+            fotoPreview.classList.add('preview');
+            
+            // Esconder placeholder
+            if (placeholder) {
+                placeholder.classList.add('fade-out');
+                setTimeout(() => {
+                    placeholder.style.display = 'none';
+                }, 300);
+            }
+            
+            // Mostrar mensagem de sucesso
+            showStatus('Preview da imagem gerado com sucesso!', 'success');
+        }, 100);
+    };
+    
+    reader.onerror = function() {
+        if (placeholder) {
+            placeholder.innerHTML = '<i class="fas fa-exclamation-circle fa-3x text-danger"></i><p class="mt-2">Erro ao carregar</p>';
+        }
+        showStatus('Erro ao carregar imagem', 'danger');
+    };
+    
+    reader.readAsDataURL(file);
+}
+
+// Buscar CEP
+async function buscarCEP() {
+    const cepInput = document.getElementById('cep');
+    const btnBuscar = document.getElementById('btn-buscar-cep');
+    const cep = cepInput.value.replace(/\D/g, '');
+    
+    if (cep.length !== 8) {
+        showStatus('Digite um CEP válido com 8 dígitos', 'warning');
+        cepInput.focus();
+        return;
+    }
+    
+    // Salvar estado original
+    const originalText = btnBuscar.innerHTML;
+    const originalDisabled = btnBuscar.disabled;
+    
+    try {
+        // Mostrar loading
+        btnBuscar.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Buscando...';
+        btnBuscar.disabled = true;
+        
+        // Fazer requisição
+        const response = await fetch(`https://brasilapi.com.br/api/cep/v2/${cep}`);
+        
+        if (!response.ok) {
+            throw new Error('CEP não encontrado');
+        }
+        
+        const data = await response.json();
+        
+        // Preencher campos com animação
+        await fillAddressFields(data);
+        
+        // Mostrar sucesso
+        showStatus('Endereço encontrado e preenchido automaticamente!', 'success');
+        
+    } catch (error) {
+        console.error('Erro ao buscar CEP:', error);
+        showStatus('CEP não encontrado. Preencha os dados manualmente.', 'warning');
+        
+    } finally {
+        // Restaurar botão
+        btnBuscar.innerHTML = originalText;
+        btnBuscar.disabled = originalDisabled;
+    }
+}
+
+// Preencher campos de endereço
+async function fillAddressFields(data) {
+    const fields = [
+        { id: 'logradouro', value: data.street },
+        { id: 'bairro', value: data.neighborhood },
+        { id: 'cidade', value: data.city },
+        { id: 'estado', value: data.state }
+    ];
+    
+    // Animar cada campo
+    for (let i = 0; i < fields.length; i++) {
+        const field = fields[i];
+        const element = document.getElementById(field.id);
+        
+        if (element && field.value) {
+            // Esperar um pouco entre cada campo
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Animar
+            element.value = field.value;
+            element.classList.add('highlight', 'is-valid');
+            
+            // Remover highlight após animação
+            setTimeout(() => {
+                element.classList.remove('highlight');
+            }, 1000);
+        }
+    }
+}
+
+// Validar campo individual
+function validateField(event) {
+    const field = event.target;
+    const value = field.value.trim();
+    
+    // Limpar validações anteriores
+    field.classList.remove('is-invalid', 'is-valid');
+    
+    // Validar conforme o tipo
+    if (field.id === 'email') {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (value && !emailRegex.test(value)) {
+            field.classList.add('is-invalid');
+            showFieldError(field, 'Digite um email válido');
+            return false;
+        } else if (value) {
+            field.classList.add('is-valid');
+        }
+    }
+    
+    else if (field.id === 'cep') {
+        const cepRegex = /^\d{5}-?\d{3}$/;
+        if (value && !cepRegex.test(value)) {
+            field.classList.add('is-invalid');
+            showFieldError(field, 'Digite um CEP válido');
+            return false;
+        } else if (value) {
+            field.classList.add('is-valid');
+        }
+    }
+    
+    else if (field.id === 'nome') {
+        if (value && value.length < 3) {
+            field.classList.add('is-invalid');
+            showFieldError(field, 'Nome deve ter pelo menos 3 caracteres');
+            return false;
+        } else if (value) {
+            field.classList.add('is-valid');
+        }
+    }
+    
+    return true;
+}
+
+// Mostrar erro em campo específico
+function showFieldError(field, message) {
+    // Remover tooltip anterior
+    const existingTooltip = field.parentElement.querySelector('.field-error');
+    if (existingTooltip) {
+        existingTooltip.remove();
+    }
+    
+    // Criar tooltip
+    const tooltip = document.createElement('div');
+    tooltip.className = 'field-error invalid-feedback d-block';
+    tooltip.textContent = message;
+    
+    field.parentElement.appendChild(tooltip);
+}
+
+// Manipular envio do formulário
+async function handleFormSubmit(event) {
+    event.preventDefault();
+    
+    // Prevenir múltiplos envios
+    if (isSubmitting) {
+        showStatus('Aguarde, já estamos processando...', 'warning');
+        return;
+    }
+    
+    // Validar formulário
+    if (!validateForm()) {
+        return;
+    }
+    
+    isSubmitting = true;
+    const submitBtn = document.getElementById('submit-btn');
+    const originalBtnText = submitBtn.innerHTML;
+    
+    try {
+        // Mostrar loading
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Salvando...';
+        submitBtn.disabled = true;
+        
+        // Preparar dados
+        const formData = new FormData(event.target);
+        
+        // Se tem nova foto, mostrar progresso
+        if (currentFile) {
+            showUploadProgress();
+        }
+        
+        // Enviar dados
+        const response = await sendFormData(formData);
+        
+        if (response.success) {
+            // Sucesso
+            showStatus(response.message || 'Perfil atualizado com sucesso!', 'success', 5000);
+            
+            // Atualizar dados no localStorage
+            updateLocalStorage(response.usuario);
+            
+            // Redirecionar após delay
+            setTimeout(() => {
+                window.location.href = '/perfil';
+            }, 2000);
+            
+        } else {
+            // Erro
+            throw new Error(response.error || response.errors || 'Erro ao salvar');
+        }
+        
+    } catch (error) {
+        console.error('Erro ao salvar perfil:', error);
+        showStatus(error.message, 'danger');
+        
+    } finally {
+        // Restaurar botão
+        isSubmitting = false;
+        submitBtn.innerHTML = originalBtnText;
+        submitBtn.disabled = false;
+        hideUploadProgress();
+    }
+}
+
+// Validar formulário completo
+function validateForm() {
+    let isValid = true;
+    const requiredFields = ['nome', 'email'];
+    
+    requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field && !field.value.trim()) {
+            field.classList.add('is-invalid');
+            showFieldError(field, 'Este campo é obrigatório');
+            isValid = false;
+        }
+    });
+    
+    // Validar email
+    const emailField = document.getElementById('email');
+    if (emailField && emailField.value) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailField.value.trim())) {
+            emailField.classList.add('is-invalid');
+            showFieldError(emailField, 'Digite um email válido');
+            isValid = false;
+        }
+    }
+    
+    return isValid;
+}
+
+// Enviar dados do formulário
+async function sendFormData(formData) {
+    const token = localStorage.getItem('access_token');
+    const csrfToken = getCSRFToken();
+    
+    const response = await fetch('/api/atualizar-perfil/', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'X-CSRFToken': csrfToken
+        },
+        body: formData
+    });
+    
+    return await response.json();
+}
+
+// Atualizar localStorage
+function updateLocalStorage(usuarioData) {
+    try {
+        const currentData = localStorage.getItem('user_data');
+        if (currentData) {
+            const parsedData = JSON.parse(currentData);
+            const updatedData = { ...parsedData, ...usuarioData };
+            localStorage.setItem('user_data', JSON.stringify(updatedData));
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar localStorage:', error);
+    }
+}
+
+// Mostrar progresso do upload
+function showUploadProgress() {
+    const progressDiv = document.getElementById('upload-progress');
+    const progressBar = document.getElementById('upload-progress-bar');
+    const percentSpan = document.getElementById('upload-percent');
+    
+    if (progressDiv && progressBar && percentSpan) {
+        progressDiv.classList.remove('d-none');
+        
+        // Simular progresso (em produção, usar eventos reais)
+        let percent = 0;
+        const interval = setInterval(() => {
+            percent += 10;
+            if (percent > 90) {
+                clearInterval(interval);
+                percent = 90; // Mantém em 90% até o fim real
+            }
+            
+            progressBar.style.width = percent + '%';
+            percentSpan.textContent = percent + '%';
+        }, 200);
+    }
+}
+
+// Esconder progresso do upload
+function hideUploadProgress() {
+    const progressDiv = document.getElementById('upload-progress');
+    if (progressDiv) {
+        progressDiv.classList.add('d-none');
+        
+        // Resetar progresso
+        const progressBar = document.getElementById('upload-progress-bar');
+        const percentSpan = document.getElementById('upload-percent');
+        
+        if (progressBar) progressBar.style.width = '0%';
+        if (percentSpan) percentSpan.textContent = '0%';
+    }
+}
+
+// Resetar formulário
+function resetForm() {
+    if (confirm('Deseja desfazer todas as alterações?')) {
+        // Restaurar campos
+        document.getElementById('nome').value = originalData.nome;
+        document.getElementById('email').value = originalData.email;
+        document.getElementById('cep').value = originalData.cep;
+        document.getElementById('logradouro').value = originalData.logradouro;
+        document.getElementById('numero').value = originalData.numero;
+        document.getElementById('complemento').value = originalData.complemento;
+        document.getElementById('bairro').value = originalData.bairro;
+        document.getElementById('cidade').value = originalData.cidade;
+        document.getElementById('estado').value = originalData.estado;
+        
+        // Restaurar foto
+        const fotoPreview = document.getElementById('foto-preview');
+        const fotoInput = document.getElementById('foto');
+        const fotoName = document.getElementById('foto-name');
+        
+        if (fotoPreview && originalData.fotoUrl) {
+            fotoPreview.src = originalData.fotoUrl;
+            fotoPreview.classList.remove('preview');
+        }
+        
+        if (fotoInput) {
+            fotoInput.value = '';
+        }
+        
+        if (fotoName) {
+            fotoName.value = '';
+        }
+        
+        // Limpar validações
+        const fields = document.querySelectorAll('.is-invalid, .is-valid');
+        fields.forEach(field => {
+            field.classList.remove('is-invalid', 'is-valid');
+        });
+        
+        // Limpar mensagens de erro
+        const errorElements = document.querySelectorAll('.field-error');
+        errorElements.forEach(el => el.remove());
+        
+        // Limpar status
+        clearStatus();
+        
+        // Mostrar confirmação
+        showStatus('Alterações desfeitas', 'info');
+    }
+}
+
+// Mostrar status
+function showStatus(message, type = 'info', duration = 3000) {
+    clearStatus();
+    
+    // Determinar qual div usar
+    let statusDiv, statusText;
+    
+    if (type === 'success') {
+        statusDiv = document.getElementById('form-success');
+        statusText = document.getElementById('form-success-text');
+    } else if (type === 'danger' || type === 'error') {
+        statusDiv = document.getElementById('form-error');
+        statusText = document.getElementById('form-error-text');
+        type = 'danger';
+    } else if (type === 'warning') {
+        statusDiv = document.getElementById('form-warning');
+        statusText = document.getElementById('form-warning-text');
+    } else {
+        statusDiv = document.getElementById('form-success');
+        statusText = document.getElementById('form-success-text');
+        type = 'info';
+    }
+    
+    if (statusDiv && statusText) {
+        statusText.textContent = message;
+        statusDiv.className = `alert alert-${type} fade-in`;
+        statusDiv.classList.remove('d-none');
+        
+        // Auto-esconder
+        if (duration > 0) {
+            setTimeout(() => {
+                statusDiv.classList.add('d-none');
+            }, duration);
+        }
+    }
+}
+
+// Limpar status
+function clearStatus() {
+    const statusDivs = [
+        'form-success',
+        'form-error', 
+        'form-warning',
+        'foto-status'
+    ];
+    
+    statusDivs.forEach(id => {
+        const div = document.getElementById(id);
+        if (div) {
+            div.classList.add('d-none');
+        }
+    });
+}
+
+// Obter token CSRF
+function getCSRFToken() {
+    // Do input hidden
+    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfInput) return csrfInput.value;
+    
+    // Do cookie
+    const name = 'csrftoken';
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue || '';
+}
+
+// Funções globais para chamadas do template
+window.buscarCEP = buscarCEP;
+window.resetForm = resetForm;
+</script>
+{% endblock %}
